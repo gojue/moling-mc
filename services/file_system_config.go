@@ -52,6 +52,6 @@ func (fc *FileSystemConfig) Check() error {
 
 		normalized = append(normalized, filepath.Clean(abs)+string(filepath.Separator))
 	}
-
+	fc.allowedDirs = normalized
 	return nil
 }
