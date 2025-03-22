@@ -1,4 +1,4 @@
-name: Golang CI
+name: Golang CI and Test
 
 on:
   push:
@@ -13,7 +13,7 @@ jobs:
         os: [ darwin, windows, linux ]
         arch: [amd64, arm64]
     runs-on: ubuntu-22.04
-    name: build on ${{ matrix.os }} ${{ matrix.arch }}
+    name: test on ${{ matrix.os }} ${{ matrix.arch }}
     steps:
       - uses: actions/setup-go@v5
         with:
@@ -33,7 +33,7 @@ jobs:
           make clean
           TARGET_OS=${{ matrix.os }} TARGET_ARCH=${{ matrix.arch }} make env
           TARGET_OS=${{ matrix.os }} TARGET_ARCH=${{ matrix.arch }} make test
-      - name: Golang Build
+      - name: MoLing Build
         run: |
           make clean
           TARGET_OS=${{ matrix.os }} TARGET_ARCH=${{ matrix.arch }} make env
