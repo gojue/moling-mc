@@ -16,7 +16,7 @@ type MockCommandServer struct {
 // TestExecuteCommand tests the executeCommand function.
 func TestExecuteCommand(t *testing.T) {
 	cs := &MockCommandServer{}
-	execCmd := "ping -c 4 devel.sankuai.com &> /dev/null | echo 'Hello, World!'"
+	execCmd := "ping -c 4 notfound.gojue.cc &> /dev/null | echo 'Hello, World!'"
 	// Test a simple command
 	output, err := cs.executeCommand(execCmd)
 	if err != nil {

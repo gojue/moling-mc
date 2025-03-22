@@ -18,6 +18,8 @@ env:
 	@echo ---------------------------------------
 	@echo "OS_NAME                  $(OS_NAME)"
 	@echo "OS_ARCH                  $(OS_ARCH)"
+	@echo "TARGET_OS                $(TARGET_OS)"
+	@echo "TARGET_ARCH              $(TARGET_ARCH)"
 	@echo "GO_VERSION               $(GO_VERSION)"
 	@echo ---------------------------------------
 	@echo "CMD_GIT                  $(CMD_GIT)"
@@ -27,7 +29,6 @@ env:
 	@echo ---------------------------------------
 	@echo "VERSION_NUM              $(VERSION_NUM)"
 	@echo "LAST_GIT_TAG             $(LAST_GIT_TAG)"
-	@echo "GOARCH                   $(GOARCH)"
 	@echo ---------------------------------------
 
 
@@ -40,7 +41,7 @@ help:
 	@echo "    $$ make all					# build ecapture"
 	@echo ""
 	@echo "# clean"
-	@echo "    $$ make clean				# wipe ./bin/ ./user/bytecode/ ./assets/"
+	@echo "    $$ make clean				# wipe ./bin/"
 	@echo ""
 	@echo "# test"
 
@@ -52,13 +53,11 @@ clean:
 
 .PHONY: build
 build:
-	$(call gobuild)
+	$(call gobuild,$(TARGET_OS),$(TARGET_ARCH))
 
 .PHONY: dev
 dev: clean
-	$(call allow-override, TARGET_OSS, $(OS_NAME))
-	$(call allow-override, TARGET_ARCHS, $(OS_ARCH))
-	$(call gobuild)
+	$(call gobuild,$(OS_NAME),$(OS_ARCH))
 
 # Format the code
 .PHONY: format

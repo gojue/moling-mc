@@ -4,14 +4,12 @@ define allow-override
     $(eval $(1) = $(2)))
 endef
 
+# TARGET_OS , TARGET_ARCH
 define gobuild
-	$(foreach TARGET_OS_NAME, $(TARGET_OSS),\
-		$(foreach TARGET_OS_ARCH, $(TARGET_ARCHS),\
-			CGO_ENABLED=0 \
-			GOOS=$(TARGET_OS_NAME) GOARCH=$(TARGET_OS_ARCH) \
-			$(CMD_GO) build -trimpath -mod=readonly -ldflags "-w -s -X 'github.com/gojue/moling/cli/cmd.GitVersion=$(TARGET_OS_NAME)-$(TARGET_OS_ARCH)-$(VERSION_NUM)'" -o $(OUT_BIN)-$(TARGET_OS_NAME)-$(TARGET_OS_ARCH)
-			$(CMD_FILE) $(OUT_BIN)-$(TARGET_OS_NAME)-$(TARGET_OS_ARCH)
-		)
-	)
+	CGO_ENABLED=0 \
+	GOOS=$(1) GOARCH=$(2) \
+	$(eval OUT_BIN_SUFFIX=$(if $(filter $(1),windows),.exe,)) \
+	$(CMD_GO) build -trimpath -mod=readonly -ldflags "-w -s -X 'github.com/gojue/moling/cli/cmd.GitVersion=$(1)-$(2)-$(VERSION_NUM)'" -o $(OUT_BIN)$(OUT_BIN_SUFFIX)
+	$(CMD_FILE) $(OUT_BIN)$(OUT_BIN_SUFFIX)
 endef
 

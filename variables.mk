@@ -22,11 +22,6 @@ CMD_CP ?= cp
 CMD_CD ?= cd
 CMD_ECHO ?= echo
 
-STYLE    ?= "{BasedOnStyle: Google, IndentWidth: 4, TabWidth: 4, UseTab: Never, ColumnLimit: 120}"
-SUDO ?=
-GOARCH ?=
-DEBUG_PRINT ?=
-KERNEL_HEADER_GEN ?= whoami
 
 #
 # tools version
@@ -60,6 +55,6 @@ TARGET_TAG :=
 OS_NAME ?= $(shell uname -s|tr 'A-Z' 'a-z')
 OS_ARCH ?= $(shell uname -m)
 OS_VERSION_SHORT := $(shell uname -r | cut -d'-' -f 1)
-TARGET_OSS ?= darwin linux windows
-TARGET_ARCHS ?= amd64 arm64
+TARGET_OS ?= darwin
+TARGET_ARCH ?= amd64
 OUT_BIN := bin/moling
