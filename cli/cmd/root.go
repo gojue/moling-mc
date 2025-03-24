@@ -18,8 +18,10 @@ import (
 	"context"
 	"github.com/gojue/moling/cli/cobrautl"
 	"github.com/gojue/moling/services"
+	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 	"os"
+	"time"
 )
 
 type contextKey string
@@ -104,8 +106,31 @@ func init() {
 	rootCmd.PersistentFlags().StringSliceVar(&allowCmd, "allow-cmd", []string{"ifconfig", "whomai", "ip", "ss", "ls", "pwd", "cat", "echo", "date", "whoami", "uname", "top", "ps", "df", "free", "uptime", "ifconfig", "ip", "netstat", "ping", "traceroute", "curl", "wget", "dig", "nslookup", "ssh", "head"}, "allow commands")
 	rootCmd.SilenceUsage = true
 }
+
+// initLogger init logger
+func initLogger(addr string) zerolog.Logger {
+	var logger zerolog.Logger
+	var err error
+	consoleWriter := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}
+	logger = zerolog.New(consoleWriter).With().Timestamp().Logger()
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	var f *os.File
+	f, err = os.Create(addr)
+	if err == nil && f != nil {
+		multi := zerolog.MultiLevelWriter(consoleWriter, f)
+		logger = zerolog.New(multi).With().Timestamp().Logger()
+	} else {
+		logger.Warn().Err(err).Msg("failed to create multiLogger")
+	}
+	return logger
+}
+
 func mlsCommandFunc(command *cobra.Command, args []string) error {
+	loger := initLogger("/Users/cfc4n/.moling/logs/moling_debug.log")
 	ctx := context.WithValue(context.Background(), MoLingVersion, GitVersion)
+	ctx = context.WithValue(ctx, "logger", loger)
+
 	var srvs []services.Service
 
 	// FileSystemServer
@@ -115,12 +140,21 @@ func mlsCommandFunc(command *cobra.Command, args []string) error {
 	}
 	srvs = append(srvs, fs)
 
+	//	CommandServer
 	cs, err := services.NewCommandServer(ctx, services.NewCommandConfig(allowCmd))
 	if err != nil {
 		return err
 	}
 	srvs = append(srvs, cs)
 
+	// BrowserServer
+	bs, err := services.NewBrowserServer(ctx, services.NewBrowserConfig())
+	if err != nil {
+		return err
+	}
+	srvs = append(srvs, bs)
+
+	// MCPServer
 	srv, err := NewMoLingServer(ctx, srvs)
 	if err != nil {
 		return err
