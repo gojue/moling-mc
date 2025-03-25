@@ -11,6 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// Repository: https://github.com/gojue/moling
 
 package services
 
@@ -22,21 +24,20 @@ import (
 
 // FileSystemConfig represents the configuration for the file system.
 type FileSystemConfig struct {
-	// allowedDirs is a list of allowed directories.
-	allowedDirs []string
+	AllowedDirs []string `json:"allowed_dirs,omitempty"` // AllowedDirs is a list of allowed directories.
 }
 
 // NewFileSystemConfig creates a new FileSystemConfig with the given allowed directories.
 func NewFileSystemConfig(path []string) *FileSystemConfig {
 	return &FileSystemConfig{
-		allowedDirs: path,
+		AllowedDirs: path,
 	}
 }
 
 // Check validates the allowed directories in the FileSystemConfig.
 func (fc *FileSystemConfig) Check() error {
-	normalized := make([]string, 0, len(fc.allowedDirs))
-	for _, dir := range fc.allowedDirs {
+	normalized := make([]string, 0, len(fc.AllowedDirs))
+	for _, dir := range fc.AllowedDirs {
 		abs, err := filepath.Abs(dir)
 		if err != nil {
 			return fmt.Errorf("failed to resolve path %s: %w", dir, err)
@@ -52,6 +53,6 @@ func (fc *FileSystemConfig) Check() error {
 
 		normalized = append(normalized, filepath.Clean(abs)+string(filepath.Separator))
 	}
-	fc.allowedDirs = normalized
+	fc.AllowedDirs = normalized
 	return nil
 }

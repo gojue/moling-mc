@@ -28,8 +28,8 @@ type MoLingServer struct {
 
 func NewMoLingServer(ctx context.Context, services []services.Service) (*MoLingServer, error) {
 	mcpServer := server.NewMCPServer(
-		"gojue-moling-server",
-		"0.0.1",
+		MCPServerName,
+		GitVersion,
 		server.WithResourceCapabilities(true, true),
 		server.WithLogging(),
 		server.WithPromptCapabilities(true),

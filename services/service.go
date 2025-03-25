@@ -11,6 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// Repository: https://github.com/gojue/moling
 
 package services
 
@@ -18,7 +20,16 @@ import (
 	"context"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
+	"github.com/rs/zerolog"
 	"sync"
+)
+
+type contextKey string
+
+// MoLingConfigKey is a context key for storing the version of MoLing
+const (
+	MoLingConfigKey contextKey = "moling_config"
+	MoLingLoggerKey contextKey = "moling_logger"
 )
 
 // Service defines the interface for a service with various handlers and tools.
@@ -34,6 +45,10 @@ type Service interface {
 	Tools() []server.ServerTool
 	// NotificationHandlers returns a map of notification handlers.
 	NotificationHandlers() map[string]server.NotificationHandlerFunc
+
+	// Config returns the configuration of the service as a string.
+	Config() string
+	Name() string
 }
 
 type PromptEntry struct {
@@ -59,6 +74,7 @@ type MLService struct {
 	prompts              []PromptEntry
 	tools                []server.ServerTool
 	notificationHandlers map[string]server.NotificationHandlerFunc
+	logger               zerolog.Logger // The logger for the service
 }
 
 // init initializes the MLService with empty maps and a mutex.
@@ -146,3 +162,12 @@ func (mls *MLService) NotificationHandlers() map[string]server.NotificationHandl
 	defer mls.lock.Unlock()
 	return mls.notificationHandlers
 }
+
+//// Config returns the configuration of the service as a string.
+//func (mls *MLService) Config() string {
+//	panic("not implemented yet") // TODO: Implement
+//}
+//
+//func (mls *MLService) Name() string {
+//	panic("not implemented yet") // TODO: Implement
+//}

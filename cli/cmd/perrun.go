@@ -1,5 +1,3 @@
-//go:build windows
-
 // Copyright 2025 CFC4N <cfc4n.cs@gmail.com>. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,17 +14,11 @@
 //
 // Repository: https://github.com/gojue/moling
 
-// Package services Description: This file contains the implementation of the CommandServer interface for Windows.
-package services
+package cmd
 
-import (
-	"os/exec"
-)
+import "github.com/spf13/cobra"
 
-// executeCommand executes a command and returns its output.
-func (cs *CommandServer) executeCommand(command string) (string, error) {
-	var cmd *exec.Cmd
-	cmd = exec.Command("cmd", "/C", command)
-	output, err := cmd.CombinedOutput()
-	return string(output), err
+func MoLingPreRunE(cmd *cobra.Command, args []string) error {
+	// TODO 检查 root path、创建目录等
+	return nil
 }

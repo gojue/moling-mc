@@ -11,11 +11,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// Repository: https://github.com/gojue/moling
 
 package cmd
 
 import (
 	"context"
+	"fmt"
 	"github.com/gojue/moling/cli/cobrautl"
 	"github.com/gojue/moling/services"
 	"github.com/rs/zerolog"
@@ -24,12 +27,11 @@ import (
 	"time"
 )
 
-type contextKey string
-
 const (
 	CliName            = "moling"
 	CliNameZh          = "魔灵"
-	CliDescription     = "A local office automation magic assistant, Moling can help you perform file viewing, reading, and other related tasks, as well as assist with command-line operations.\n\n"
+	MCPServerName      = "Gojue MoLing Server"
+	CliDescription     = "A local office automation magic assistant, Moling can help you perform file viewing, reading, and other related tasks, as well as assist with command-line operations."
 	CliDescriptionZh   = "本地办公自动化魔法助手，可以帮你实现文件查看、阅读等操作，也可以帮你执行命令行操作。"
 	CliHomepage        = "https://gojue.cc/moling"
 	CliAuthor          = "CFC4N <cfc4ncs@gmail.com>"
@@ -54,18 +56,17 @@ Usage:
 
 var (
 	GitVersion = "linux-arm64-202503222008-v0.0.1"
-)
-
-// MoLingVersion is a context key for storing the version of MoLing
-const (
-	MoLingVersion contextKey = "moling_version"
+	mlConfig   = &services.MoLingConfig{
+		Version:  GitVersion,
+		DataPath: "/Users/cfc4n/.moling",
+	}
 )
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:        CliName,
 	Short:      CliDescription,
-	SuggestFor: []string{"moling"},
+	SuggestFor: []string{"molin", "moli", "mling"},
 
 	Long: CliDescriptionLong,
 	// Uncomment the following line if your bare application
@@ -95,15 +96,14 @@ func Execute() {
 	}
 }
 
-var allowDir []string
-var allowCmd []string
-
 func init() {
 	cobra.EnablePrefixMatching = true
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	rootCmd.PersistentFlags().StringSliceVar(&allowDir, "allow-dir", []string{"/tmp"}, "allow dir")
-	rootCmd.PersistentFlags().StringSliceVar(&allowCmd, "allow-cmd", []string{"ifconfig", "whomai", "ip", "ss", "ls", "pwd", "cat", "echo", "date", "whoami", "uname", "top", "ps", "df", "free", "uptime", "ifconfig", "ip", "netstat", "ping", "traceroute", "curl", "wget", "dig", "nslookup", "ssh", "head"}, "allow commands")
+	rootCmd.PersistentFlags().StringVarP(&mlConfig.ConfigFile, "config_file", "c", "", "MoLing Config File Path")
+	//rootCmd.PersistentFlags().StringVar(&mlConfig.DataPath, "root-path", "", "MoLing Data Path")
+	//rootCmd.PersistentFlags().StringSliceVar(&mlConfig.AllowDir, "allow-dir", []string{"/tmp"}, "allow dir")
+	//rootCmd.PersistentFlags().StringSliceVar(&mlConfig.AllowCommand, "allow-cmd", []string{"ifconfig", "whomai", "ip", "ss", "ls", "pwd", "cat", "echo", "date", "whoami", "uname", "top", "ps", "df", "free", "uptime", "ifconfig", "ip", "netstat", "ping", "traceroute", "curl", "wget", "dig", "nslookup", "ssh", "head"}, "allow commands")
 	rootCmd.SilenceUsage = true
 }
 
@@ -123,36 +123,26 @@ func initLogger(addr string) zerolog.Logger {
 	} else {
 		logger.Warn().Err(err).Msg("failed to create multiLogger")
 	}
+	logger.Info().Str("ServerName", MCPServerName).Str("version", GitVersion).Msg("start")
 	return logger
 }
 
 func mlsCommandFunc(command *cobra.Command, args []string) error {
-	loger := initLogger("/Users/cfc4n/.moling/logs/moling_debug.log")
-	ctx := context.WithValue(context.Background(), MoLingVersion, GitVersion)
-	ctx = context.WithValue(ctx, "logger", loger)
+	loger := initLogger(fmt.Sprintf("%s/logs/moling_debug.log", mlConfig.DataPath))
+	mlConfig.SetLogger(loger)
+
+	ctx := context.WithValue(context.Background(), services.MoLingConfigKey, mlConfig)
+	ctx = context.WithValue(ctx, services.MoLingLoggerKey, loger)
 
 	var srvs []services.Service
 
-	// FileSystemServer
-	fs, err := services.NewFilesystemServer(ctx, services.NewFileSystemConfig(allowDir))
-	if err != nil {
-		return err
+	for _, nsv := range services.ServiceList() {
+		srv, err := nsv(ctx, args)
+		if err != nil {
+			return err
+		}
+		srvs = append(srvs, srv)
 	}
-	srvs = append(srvs, fs)
-
-	//	CommandServer
-	cs, err := services.NewCommandServer(ctx, services.NewCommandConfig(allowCmd))
-	if err != nil {
-		return err
-	}
-	srvs = append(srvs, cs)
-
-	// BrowserServer
-	bs, err := services.NewBrowserServer(ctx, services.NewBrowserConfig())
-	if err != nil {
-		return err
-	}
-	srvs = append(srvs, bs)
 
 	// MCPServer
 	srv, err := NewMoLingServer(ctx, srvs)

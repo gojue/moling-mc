@@ -11,6 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// Repository: https://github.com/gojue/moling
 
 package services
 
@@ -20,24 +22,24 @@ import (
 
 // CommandConfig represents the configuration for allowed commands.
 type CommandConfig struct {
-	// allowedCommands is a list of allowed commands.
-	allowedCommands []string
+	// AllowedCommands is a list of allowed commands.
+	AllowedCommands []string `json:"allowed_commands,omitempty"`
 }
 
 // NewCommandConfig creates a new CommandConfig with the given allowed commands.
 func NewCommandConfig(commands []string) *CommandConfig {
 	return &CommandConfig{
-		allowedCommands: commands,
+		AllowedCommands: commands,
 	}
 }
 
 // Check validates the allowed commands in the CommandConfig.
 func (cc *CommandConfig) Check() error {
 	var cnt int
-	cnt = len(cc.allowedCommands)
+	cnt = len(cc.AllowedCommands)
 
 	// Check if any command is empty
-	for _, cmd := range cc.allowedCommands {
+	for _, cmd := range cc.AllowedCommands {
 		if cmd == "" {
 			cnt -= 1
 		}

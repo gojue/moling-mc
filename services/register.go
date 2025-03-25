@@ -1,5 +1,3 @@
-//go:build windows
-
 // Copyright 2025 CFC4N <cfc4n.cs@gmail.com>. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,17 +14,20 @@
 //
 // Repository: https://github.com/gojue/moling
 
-// Package services Description: This file contains the implementation of the CommandServer interface for Windows.
 package services
 
 import (
-	"os/exec"
+	"context"
 )
 
-// executeCommand executes a command and returns its output.
-func (cs *CommandServer) executeCommand(command string) (string, error) {
-	var cmd *exec.Cmd
-	cmd = exec.Command("cmd", "/C", command)
-	output, err := cmd.CombinedOutput()
-	return string(output), err
+var serviceLists []func(ctx context.Context, args []string) (Service, error)
+
+// RegisterServ register service
+func RegisterServ(f func(ctx context.Context, args []string) (Service, error)) {
+	serviceLists = append(serviceLists, f)
+}
+
+// ServiceList  get service lists
+func ServiceList() []func(ctx context.Context, args []string) (Service, error) {
+	return serviceLists
 }

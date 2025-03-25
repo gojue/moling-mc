@@ -11,14 +11,18 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// Repository: https://github.com/gojue/moling
 
 // Package services Description: This file contains the implementation of the CommandServer interface for MacOS and  Linux.
 package services
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/rs/zerolog"
 )
 
 // CommandServer implements the Service interface and provides methods to execute named commands.
@@ -30,16 +34,22 @@ type CommandServer struct {
 }
 
 // NewCommandServer creates a new CommandServer with the given allowed commands.
-func NewCommandServer(ctx context.Context, cfg Config) (Service, error) {
+func NewCommandServer(ctx context.Context, args []string) (Service, error) {
 	var err error
-	cc, ok := cfg.(*CommandConfig)
+	cc := NewCommandConfig(args)
+	lger, ok := ctx.Value(MoLingLoggerKey).(zerolog.Logger)
 	if !ok {
-		return nil, fmt.Errorf("invalid config type")
+		return nil, fmt.Errorf("CommandServer: invalid logger type")
 	}
+
+	loggerNameHook := zerolog.HookFunc(func(e *zerolog.Event, level zerolog.Level, msg string) {
+		e.Str("Service", "CommandServer")
+	})
 
 	cs := &CommandServer{
 		MLService: MLService{
-			ctx: ctx,
+			ctx:    ctx,
+			logger: lger.Hook(loggerNameHook),
 		},
 		config: cc,
 	}
@@ -132,14 +142,32 @@ func (cs *CommandServer) handleExecuteCommand(ctx context.Context, request mcp.C
 // isCommandAllowed checks if a command is in the list of allowed commands.
 func (cs *CommandServer) isCommandAllowed(command string) bool {
 	//return true
-	if len(cs.config.allowedCommands) == 0 {
+	if len(cs.config.AllowedCommands) == 0 {
 		return true
 	}
 
-	for _, allowed := range cs.config.allowedCommands {
+	for _, allowed := range cs.config.AllowedCommands {
 		if command == allowed {
 			return true
 		}
 	}
 	return false
+}
+
+// Config returns the configuration of the service as a string.
+func (cs *CommandServer) Config() string {
+	cfg, err := json.Marshal(cs.config)
+	if err != nil {
+		cs.logger.Err(err).Msg("failed to marshal config")
+		return "{}"
+	}
+	return string(cfg)
+}
+
+func (cs *CommandServer) Name() string {
+	return "CommandServer"
+}
+
+func init() {
+	RegisterServ(NewCommandServer)
 }

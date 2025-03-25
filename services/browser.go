@@ -19,49 +19,53 @@ package services
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/chromedp/chromedp"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/rs/zerolog"
 	"os"
+	"path/filepath"
 )
 
 // BrowserServer represents the configuration for the browser service.
 type BrowserServer struct {
 	MLService
 	config *BrowserConfig
+	name   string // The name of the service
 	ctx    context.Context
 	cancel context.CancelFunc
 }
 
 // NewBrowserServer creates a new BrowserServer instance with the given context and configuration.
-func NewBrowserServer(ctx context.Context, cfg Config) (Service, error) {
-	bc, ok := cfg.(*BrowserConfig)
+func NewBrowserServer(ctx context.Context, args []string) (Service, error) {
+
+	bc := NewBrowserConfig()
+	logger, ok := ctx.Value(MoLingLoggerKey).(zerolog.Logger)
 	if !ok {
-		return nil, fmt.Errorf("invalid config type: %T", cfg)
+		return nil, fmt.Errorf("BrowserServer: invalid logger type: %T", ctx.Value(MoLingLoggerKey))
 	}
 
-	logger := ctx.Value("logger").(zerolog.Logger)
+	loggerNameHook := zerolog.HookFunc(func(e *zerolog.Event, level zerolog.Level, msg string) {
+		e.Str("Service", "BrowserServer")
+	})
+
 	bs := &BrowserServer{
 		config: bc,
 	}
+	bs.logger = logger.Hook(loggerNameHook)
 
-	/*
-		user-data-dir : ~/.moling/browser/
-		no-sandbox
-		remote-debugging-port
-	*/
+	globalConf := ctx.Value(MoLingConfigKey).(*MoLingConfig)
 	opts := []chromedp.ExecAllocatorOption{
 		chromedp.UserAgent(bc.UserAgent),
 		chromedp.Flag("lang", bc.DefaultLanguage),
 		chromedp.Flag("headless", bc.Headless),
-		chromedp.Flag("user-data-dir", "/Users/cfc4n/.moling/browser/"),
+		chromedp.Flag("user-data-dir", filepath.Join(globalConf.DataPath, "browser")),
 		chromedp.CombinedOutput(logger),
 		chromedp.WindowSize(1312, 848),
 	}
 	bs.ctx, bs.cancel = chromedp.NewExecAllocator(ctx, opts...)
 	bs.ctx, bs.cancel = chromedp.NewContext(bs.ctx,
-		//chromedp.WithDebugf(logger.Printf),
 		chromedp.WithErrorf(logger.Printf),
 	)
 	err := bs.init()
@@ -204,6 +208,7 @@ func (bs *BrowserServer) handleScreenshot(ctx context.Context, request mcp.CallT
 		}, nil
 	}
 
+	// TODO
 	err = os.WriteFile(fmt.Sprintf("/Users/cfc4n/Downloads/%s.png", name), buf, 0644)
 	if err != nil {
 		return &mcp.CallToolResult{
@@ -348,4 +353,22 @@ func (bs *BrowserServer) Close() error {
 	// Cancel the context to stop the browser
 	bs.cancel()
 	return nil
+}
+
+// Config returns the configuration of the service as a string.
+func (mls *BrowserServer) Config() string {
+	cfg, err := json.Marshal(mls.config)
+	if err != nil {
+		mls.logger.Err(err).Msg("failed to marshal config")
+		return "{}"
+	}
+	return string(cfg)
+}
+
+func (cs *BrowserServer) Name() string {
+	return "BrowserServer"
+}
+
+func init() {
+	RegisterServ(NewBrowserServer)
 }

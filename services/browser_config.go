@@ -17,7 +17,9 @@
 // Package services provides a set of services for the MoLing application.
 package services
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type BrowserConfig struct {
 	Headless        bool   `json:"headless"`
@@ -27,6 +29,7 @@ type BrowserConfig struct {
 	DefaultLanguage string `json:"default_language"`
 	URLTimeout      int    `json:"url_timeout"`
 	CSSTimeout      int    `json:"css_timeout"`
+	//logger          *zerolog.Logger
 }
 
 func (cfg *BrowserConfig) Check() error {

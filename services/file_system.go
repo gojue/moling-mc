@@ -11,14 +11,20 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// Repository: https://github.com/gojue/moling
+// Source: https://github.com/mark3labs/mcp-filesystem-server
 
+// Package services provides the implementation of the FileSystemServer, which allows access to files and directories on the local file system.
 package services
 
 import (
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/rs/zerolog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -47,19 +53,28 @@ type FilesystemServer struct {
 	config *FileSystemConfig
 }
 
-func NewFilesystemServer(ctx context.Context, cfg Config) (Service, error) {
+func NewFilesystemServer(ctx context.Context, args []string) (Service, error) {
 	// Validate the config
 	var err error
-	if err = cfg.Check(); err != nil {
-		return nil, fmt.Errorf("invalid config: %v", err)
+	fc := NewFileSystemConfig(args)
+
+	if err = fc.Check(); err != nil {
+		return nil, fmt.Errorf("FilesystemServer: invalid config: %v", err)
 	}
-	fc, ok := cfg.(*FileSystemConfig)
+
+	lger, ok := ctx.Value(MoLingLoggerKey).(zerolog.Logger)
 	if !ok {
-		return nil, fmt.Errorf("invalid config type: %T", cfg)
+		return nil, fmt.Errorf("FilesystemServer: invalid logger type")
 	}
+
+	loggerNameHook := zerolog.HookFunc(func(e *zerolog.Event, level zerolog.Level, msg string) {
+		e.Str("Service", "FileSystemServer")
+	})
+
 	fs := &FilesystemServer{
 		MLService: MLService{
-			ctx: ctx,
+			ctx:    ctx,
+			logger: lger.Hook(loggerNameHook),
 		},
 		config: fc,
 	}
@@ -156,7 +171,7 @@ func NewFilesystemServer(ctx context.Context, cfg Config) (Service, error) {
 }
 
 // isPathInAllowedDirs checks if a path is within any of the allowed directories
-func (s *FilesystemServer) isPathInAllowedDirs(path string) bool {
+func (fs *FilesystemServer) isPathInAllowedDirs(path string) bool {
 	// Ensure path is absolute and clean
 	absPath, err := filepath.Abs(path)
 	if err != nil {
@@ -166,7 +181,7 @@ func (s *FilesystemServer) isPathInAllowedDirs(path string) bool {
 	// Add trailing separator to ensure we're checking a directory or a file within a directory
 	// and not a prefix match (e.g., /tmp/foo should not match /tmp/foobar)
 	if !strings.HasSuffix(absPath, string(filepath.Separator)) {
-		// If it's a file, we need to check its directory
+		// If it'fs a file, we need to check its directory
 		if info, err := os.Stat(absPath); err == nil && !info.IsDir() {
 			absPath = filepath.Dir(absPath) + string(filepath.Separator)
 		} else {
@@ -175,7 +190,7 @@ func (s *FilesystemServer) isPathInAllowedDirs(path string) bool {
 	}
 
 	// Check if the path is within any of the allowed directories
-	for _, dir := range s.config.allowedDirs {
+	for _, dir := range fs.config.AllowedDirs {
 		if strings.HasPrefix(absPath, dir) {
 			return true
 		}
@@ -183,7 +198,7 @@ func (s *FilesystemServer) isPathInAllowedDirs(path string) bool {
 	return false
 }
 
-func (s *FilesystemServer) validatePath(requestedPath string) (string, error) {
+func (fs *FilesystemServer) validatePath(requestedPath string) (string, error) {
 	// Always convert to absolute path first
 	abs, err := filepath.Abs(requestedPath)
 	if err != nil {
@@ -191,9 +206,9 @@ func (s *FilesystemServer) validatePath(requestedPath string) (string, error) {
 	}
 
 	// Check if path is within allowed directories
-	if !s.isPathInAllowedDirs(abs) {
+	if !fs.isPathInAllowedDirs(abs) {
 		return "", fmt.Errorf(
-			"access denied - path outside allowed directories: %s",
+			"access denied - path outside allowed directories: %fs",
 			abs,
 		)
 	}
@@ -208,10 +223,10 @@ func (s *FilesystemServer) validatePath(requestedPath string) (string, error) {
 		parent := filepath.Dir(abs)
 		realParent, err := filepath.EvalSymlinks(parent)
 		if err != nil {
-			return "", fmt.Errorf("parent directory does not exist: %s", parent)
+			return "", fmt.Errorf("parent directory does not exist: %fs", parent)
 		}
 
-		if !s.isPathInAllowedDirs(realParent) {
+		if !fs.isPathInAllowedDirs(realParent) {
 			return "", fmt.Errorf(
 				"access denied - parent directory outside allowed directories",
 			)
@@ -220,7 +235,7 @@ func (s *FilesystemServer) validatePath(requestedPath string) (string, error) {
 	}
 
 	// Check if the real path (after resolving symlinks) is still within allowed directories
-	if !s.isPathInAllowedDirs(realPath) {
+	if !fs.isPathInAllowedDirs(realPath) {
 		return "", fmt.Errorf(
 			"access denied - symlink target outside allowed directories",
 		)
@@ -229,7 +244,7 @@ func (s *FilesystemServer) validatePath(requestedPath string) (string, error) {
 	return realPath, nil
 }
 
-func (s *FilesystemServer) getFileStats(path string) (FileInfo, error) {
+func (fs *FilesystemServer) getFileStats(path string) (FileInfo, error) {
 	info, err := os.Stat(path)
 	if err != nil {
 		return FileInfo{}, err
@@ -246,7 +261,7 @@ func (s *FilesystemServer) getFileStats(path string) (FileInfo, error) {
 	}, nil
 }
 
-func (s *FilesystemServer) searchFiles(
+func (fs *FilesystemServer) searchFiles(
 	rootPath, pattern string,
 ) ([]string, error) {
 	var results []string
@@ -260,7 +275,7 @@ func (s *FilesystemServer) searchFiles(
 			}
 
 			// Try to validate path
-			if _, err := s.validatePath(path); err != nil {
+			if _, err := fs.validatePath(path); err != nil {
 				return nil // Skip invalid paths
 			}
 
@@ -277,22 +292,20 @@ func (s *FilesystemServer) searchFiles(
 }
 
 // Resource handler
-func (s *FilesystemServer) handleReadResource(
-	ctx context.Context,
-	request mcp.ReadResourceRequest,
-) ([]mcp.ResourceContents, error) {
+func (fs *FilesystemServer) handleReadResource(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
 	uri := request.Params.URI
+	fs.logger.Debug().Str("uri", uri).Msg("handleReadResource")
 
-	// Check if it's a file:// URI
+	// Check if it'fs a file:// URI
 	if !strings.HasPrefix(uri, "file://") {
-		return nil, fmt.Errorf("unsupported URI scheme: %s", uri)
+		return nil, fmt.Errorf("unsupported URI scheme: %fs", uri)
 	}
 
 	// Extract the path from the URI
 	path := strings.TrimPrefix(uri, "file://")
 
 	// Validate the path
-	validPath, err := s.validatePath(path)
+	validPath, err := fs.validatePath(path)
 	if err != nil {
 		return nil, err
 	}
@@ -303,7 +316,7 @@ func (s *FilesystemServer) handleReadResource(
 		return nil, err
 	}
 
-	// If it's a directory, return a listing
+	// If it'fs a directory, return a listing
 	if fileInfo.IsDir() {
 		entries, err := os.ReadDir(validPath)
 		if err != nil {
@@ -311,21 +324,21 @@ func (s *FilesystemServer) handleReadResource(
 		}
 
 		var result strings.Builder
-		result.WriteString(fmt.Sprintf("Directory listing for: %s\n\n", validPath))
+		result.WriteString(fmt.Sprintf("Directory listing for: %fs\n\n", validPath))
 
 		for _, entry := range entries {
 			entryPath := filepath.Join(validPath, entry.Name())
 			entryURI := pathToResourceURI(entryPath)
 
 			if entry.IsDir() {
-				result.WriteString(fmt.Sprintf("[DIR]  %s (%s)\n", entry.Name(), entryURI))
+				result.WriteString(fmt.Sprintf("[DIR]  %fs (%fs)\n", entry.Name(), entryURI))
 			} else {
 				info, err := entry.Info()
 				if err == nil {
-					result.WriteString(fmt.Sprintf("[FILE] %s (%s) - %d bytes\n",
+					result.WriteString(fmt.Sprintf("[FILE] %fs (%fs) - %d bytes\n",
 						entry.Name(), entryURI, info.Size()))
 				} else {
-					result.WriteString(fmt.Sprintf("[FILE] %s (%s)\n", entry.Name(), entryURI))
+					result.WriteString(fmt.Sprintf("[FILE] %fs (%fs)\n", entry.Name(), entryURI))
 				}
 			}
 		}
@@ -339,7 +352,7 @@ func (s *FilesystemServer) handleReadResource(
 		}, nil
 	}
 
-	// It's a file, determine how to handle it
+	// It'fs a file, determine how to handle it
 	mimeType := detectMimeType(validPath)
 
 	// Check file size
@@ -362,7 +375,7 @@ func (s *FilesystemServer) handleReadResource(
 
 	// Handle based on content type
 	if isTextFile(mimeType) {
-		// It's a text file, return as text
+		// It'fs a text file, return as text
 		return []mcp.ResourceContents{
 			mcp.TextResourceContents{
 				URI:      uri,
@@ -371,7 +384,7 @@ func (s *FilesystemServer) handleReadResource(
 			},
 		}, nil
 	} else {
-		// It's a binary file
+		// It'fs a binary file
 		if fileInfo.Size() <= MaxBase64Size {
 			// Small enough for base64 encoding
 			return []mcp.ResourceContents{
@@ -387,7 +400,7 @@ func (s *FilesystemServer) handleReadResource(
 				mcp.TextResourceContents{
 					URI:      uri,
 					MIMEType: "text/plain",
-					Text:     fmt.Sprintf("Binary file (%s, %d bytes). Use the read_file tool to access specific portions.", mimeType, fileInfo.Size()),
+					Text:     fmt.Sprintf("Binary file (%fs, %d bytes). Use the read_file tool to access specific portions.", mimeType, fileInfo.Size()),
 				},
 			}, nil
 		}
@@ -396,7 +409,7 @@ func (s *FilesystemServer) handleReadResource(
 
 // Tool handlers
 
-func (s *FilesystemServer) handleReadFile(
+func (fs *FilesystemServer) handleReadFile(
 	ctx context.Context,
 	request mcp.CallToolRequest,
 ) (*mcp.CallToolResult, error) {
@@ -423,7 +436,7 @@ func (s *FilesystemServer) handleReadFile(
 		path = cwd
 	}
 
-	validPath, err := s.validatePath(path)
+	validPath, err := fs.validatePath(path)
 	if err != nil {
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{
@@ -436,7 +449,7 @@ func (s *FilesystemServer) handleReadFile(
 		}, nil
 	}
 
-	// Check if it's a directory
+	// Check if it'fs a directory
 	info, err := os.Stat(validPath)
 	if err != nil {
 		return &mcp.CallToolResult{
@@ -457,14 +470,14 @@ func (s *FilesystemServer) handleReadFile(
 			Content: []mcp.Content{
 				mcp.TextContent{
 					Type: "text",
-					Text: fmt.Sprintf("This is a directory. Use the resource URI to browse its contents: %s", resourceURI),
+					Text: fmt.Sprintf("This is a directory. Use the resource URI to browse its contents: %fs", resourceURI),
 				},
 				mcp.EmbeddedResource{
 					Type: "resource",
 					Resource: mcp.TextResourceContents{
 						URI:      resourceURI,
 						MIMEType: "text/plain",
-						Text:     fmt.Sprintf("Directory: %s", validPath),
+						Text:     fmt.Sprintf("Directory: %fs", validPath),
 					},
 				},
 			},
@@ -482,14 +495,14 @@ func (s *FilesystemServer) handleReadFile(
 			Content: []mcp.Content{
 				mcp.TextContent{
 					Type: "text",
-					Text: fmt.Sprintf("File is too large to display inline (%d bytes). Access it via resource URI: %s", info.Size(), resourceURI),
+					Text: fmt.Sprintf("File is too large to display inline (%d bytes). Access it via resource URI: %fs", info.Size(), resourceURI),
 				},
 				mcp.EmbeddedResource{
 					Type: "resource",
 					Resource: mcp.TextResourceContents{
 						URI:      resourceURI,
 						MIMEType: "text/plain",
-						Text:     fmt.Sprintf("Large file: %s (%s, %d bytes)", validPath, mimeType, info.Size()),
+						Text:     fmt.Sprintf("Large file: %fs (%fs, %d bytes)", validPath, mimeType, info.Size()),
 					},
 				},
 			},
@@ -512,7 +525,7 @@ func (s *FilesystemServer) handleReadFile(
 
 	// Handle based on content type
 	if isTextFile(mimeType) {
-		// It's a text file, return as text
+		// It'fs a text file, return as text
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{
 				mcp.TextContent{
@@ -522,13 +535,13 @@ func (s *FilesystemServer) handleReadFile(
 			},
 		}, nil
 	} else if isImageFile(mimeType) {
-		// It's an image file, return as image content
+		// It'fs an image file, return as image content
 		if info.Size() <= MaxBase64Size {
 			return &mcp.CallToolResult{
 				Content: []mcp.Content{
 					mcp.TextContent{
 						Type: "text",
-						Text: fmt.Sprintf("Image file: %s (%s, %d bytes)", validPath, mimeType, info.Size()),
+						Text: fmt.Sprintf("Image file: %fs (%fs, %d bytes)", validPath, mimeType, info.Size()),
 					},
 					mcp.ImageContent{
 						Type:     "image",
@@ -544,21 +557,21 @@ func (s *FilesystemServer) handleReadFile(
 				Content: []mcp.Content{
 					mcp.TextContent{
 						Type: "text",
-						Text: fmt.Sprintf("Image file is too large to display inline (%d bytes). Access it via resource URI: %s", info.Size(), resourceURI),
+						Text: fmt.Sprintf("Image file is too large to display inline (%d bytes). Access it via resource URI: %fs", info.Size(), resourceURI),
 					},
 					mcp.EmbeddedResource{
 						Type: "resource",
 						Resource: mcp.TextResourceContents{
 							URI:      resourceURI,
 							MIMEType: "text/plain",
-							Text:     fmt.Sprintf("Large image: %s (%s, %d bytes)", validPath, mimeType, info.Size()),
+							Text:     fmt.Sprintf("Large image: %fs (%fs, %d bytes)", validPath, mimeType, info.Size()),
 						},
 					},
 				},
 			}, nil
 		}
 	} else {
-		// It's another type of binary file
+		// It'fs another type of binary file
 		resourceURI := pathToResourceURI(validPath)
 
 		if info.Size() <= MaxBase64Size {
@@ -567,7 +580,7 @@ func (s *FilesystemServer) handleReadFile(
 				Content: []mcp.Content{
 					mcp.TextContent{
 						Type: "text",
-						Text: fmt.Sprintf("Binary file: %s (%s, %d bytes)", validPath, mimeType, info.Size()),
+						Text: fmt.Sprintf("Binary file: %fs (%fs, %d bytes)", validPath, mimeType, info.Size()),
 					},
 					mcp.EmbeddedResource{
 						Type: "resource",
@@ -585,14 +598,14 @@ func (s *FilesystemServer) handleReadFile(
 				Content: []mcp.Content{
 					mcp.TextContent{
 						Type: "text",
-						Text: fmt.Sprintf("Binary file: %s (%s, %d bytes). Access it via resource URI: %s", validPath, mimeType, info.Size(), resourceURI),
+						Text: fmt.Sprintf("Binary file: %fs (%fs, %d bytes). Access it via resource URI: %fs", validPath, mimeType, info.Size(), resourceURI),
 					},
 					mcp.EmbeddedResource{
 						Type: "resource",
 						Resource: mcp.TextResourceContents{
 							URI:      resourceURI,
 							MIMEType: "text/plain",
-							Text:     fmt.Sprintf("Binary file: %s (%s, %d bytes)", validPath, mimeType, info.Size()),
+							Text:     fmt.Sprintf("Binary file: %fs (%fs, %d bytes)", validPath, mimeType, info.Size()),
 						},
 					},
 				},
@@ -601,7 +614,7 @@ func (s *FilesystemServer) handleReadFile(
 	}
 }
 
-func (s *FilesystemServer) handleWriteFile(
+func (fs *FilesystemServer) handleWriteFile(
 	ctx context.Context,
 	request mcp.CallToolRequest,
 ) (*mcp.CallToolResult, error) {
@@ -632,7 +645,7 @@ func (s *FilesystemServer) handleWriteFile(
 		path = cwd
 	}
 
-	validPath, err := s.validatePath(path)
+	validPath, err := fs.validatePath(path)
 	if err != nil {
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{
@@ -645,7 +658,7 @@ func (s *FilesystemServer) handleWriteFile(
 		}, nil
 	}
 
-	// Check if it's a directory
+	// Check if it'fs a directory
 	if info, err := os.Stat(validPath); err == nil && info.IsDir() {
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{
@@ -692,7 +705,7 @@ func (s *FilesystemServer) handleWriteFile(
 			Content: []mcp.Content{
 				mcp.TextContent{
 					Type: "text",
-					Text: fmt.Sprintf("Successfully wrote to %s", path),
+					Text: fmt.Sprintf("Successfully wrote to %fs", path),
 				},
 			},
 		}, nil
@@ -703,21 +716,21 @@ func (s *FilesystemServer) handleWriteFile(
 		Content: []mcp.Content{
 			mcp.TextContent{
 				Type: "text",
-				Text: fmt.Sprintf("Successfully wrote %d bytes to %s", info.Size(), path),
+				Text: fmt.Sprintf("Successfully wrote %d bytes to %fs", info.Size(), path),
 			},
 			mcp.EmbeddedResource{
 				Type: "resource",
 				Resource: mcp.TextResourceContents{
 					URI:      resourceURI,
 					MIMEType: "text/plain",
-					Text:     fmt.Sprintf("File: %s (%d bytes)", validPath, info.Size()),
+					Text:     fmt.Sprintf("File: %fs (%d bytes)", validPath, info.Size()),
 				},
 			},
 		},
 	}, nil
 }
 
-func (s *FilesystemServer) handleListDirectory(
+func (fs *FilesystemServer) handleListDirectory(
 	ctx context.Context,
 	request mcp.CallToolRequest,
 ) (*mcp.CallToolResult, error) {
@@ -744,7 +757,7 @@ func (s *FilesystemServer) handleListDirectory(
 		path = cwd
 	}
 
-	validPath, err := s.validatePath(path)
+	validPath, err := fs.validatePath(path)
 	if err != nil {
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{
@@ -757,7 +770,7 @@ func (s *FilesystemServer) handleListDirectory(
 		}, nil
 	}
 
-	// Check if it's a directory
+	// Check if it'fs a directory
 	info, err := os.Stat(validPath)
 	if err != nil {
 		return &mcp.CallToolResult{
@@ -797,21 +810,21 @@ func (s *FilesystemServer) handleListDirectory(
 	}
 
 	var result strings.Builder
-	result.WriteString(fmt.Sprintf("Directory listing for: %s\n\n", validPath))
+	result.WriteString(fmt.Sprintf("Directory listing for: %fs\n\n", validPath))
 
 	for _, entry := range entries {
 		entryPath := filepath.Join(validPath, entry.Name())
 		resourceURI := pathToResourceURI(entryPath)
 
 		if entry.IsDir() {
-			result.WriteString(fmt.Sprintf("[DIR]  %s (%s)\n", entry.Name(), resourceURI))
+			result.WriteString(fmt.Sprintf("[DIR]  %fs (%fs)\n", entry.Name(), resourceURI))
 		} else {
 			info, err := entry.Info()
 			if err == nil {
-				result.WriteString(fmt.Sprintf("[FILE] %s (%s) - %d bytes\n",
+				result.WriteString(fmt.Sprintf("[FILE] %fs (%fs) - %d bytes\n",
 					entry.Name(), resourceURI, info.Size()))
 			} else {
-				result.WriteString(fmt.Sprintf("[FILE] %s (%s)\n", entry.Name(), resourceURI))
+				result.WriteString(fmt.Sprintf("[FILE] %fs (%fs)\n", entry.Name(), resourceURI))
 			}
 		}
 	}
@@ -829,14 +842,14 @@ func (s *FilesystemServer) handleListDirectory(
 				Resource: mcp.TextResourceContents{
 					URI:      resourceURI,
 					MIMEType: "text/plain",
-					Text:     fmt.Sprintf("Directory: %s", validPath),
+					Text:     fmt.Sprintf("Directory: %fs", validPath),
 				},
 			},
 		},
 	}, nil
 }
 
-func (s *FilesystemServer) handleCreateDirectory(
+func (fs *FilesystemServer) handleCreateDirectory(
 	ctx context.Context,
 	request mcp.CallToolRequest,
 ) (*mcp.CallToolResult, error) {
@@ -863,7 +876,7 @@ func (s *FilesystemServer) handleCreateDirectory(
 		path = cwd
 	}
 
-	validPath, err := s.validatePath(path)
+	validPath, err := fs.validatePath(path)
 	if err != nil {
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{
@@ -884,14 +897,14 @@ func (s *FilesystemServer) handleCreateDirectory(
 				Content: []mcp.Content{
 					mcp.TextContent{
 						Type: "text",
-						Text: fmt.Sprintf("Directory already exists: %s", path),
+						Text: fmt.Sprintf("Directory already exists: %fs", path),
 					},
 					mcp.EmbeddedResource{
 						Type: "resource",
 						Resource: mcp.TextResourceContents{
 							URI:      resourceURI,
 							MIMEType: "text/plain",
-							Text:     fmt.Sprintf("Directory: %s", validPath),
+							Text:     fmt.Sprintf("Directory: %fs", validPath),
 						},
 					},
 				},
@@ -901,7 +914,7 @@ func (s *FilesystemServer) handleCreateDirectory(
 			Content: []mcp.Content{
 				mcp.TextContent{
 					Type: "text",
-					Text: fmt.Sprintf("Error: Path exists but is not a directory: %s", path),
+					Text: fmt.Sprintf("Error: Path exists but is not a directory: %fs", path),
 				},
 			},
 			IsError: true,
@@ -925,21 +938,21 @@ func (s *FilesystemServer) handleCreateDirectory(
 		Content: []mcp.Content{
 			mcp.TextContent{
 				Type: "text",
-				Text: fmt.Sprintf("Successfully created directory %s", path),
+				Text: fmt.Sprintf("Successfully created directory %fs", path),
 			},
 			mcp.EmbeddedResource{
 				Type: "resource",
 				Resource: mcp.TextResourceContents{
 					URI:      resourceURI,
 					MIMEType: "text/plain",
-					Text:     fmt.Sprintf("Directory: %s", validPath),
+					Text:     fmt.Sprintf("Directory: %fs", validPath),
 				},
 			},
 		},
 	}, nil
 }
 
-func (s *FilesystemServer) handleMoveFile(
+func (fs *FilesystemServer) handleMoveFile(
 	ctx context.Context,
 	request mcp.CallToolRequest,
 ) (*mcp.CallToolResult, error) {
@@ -988,7 +1001,7 @@ func (s *FilesystemServer) handleMoveFile(
 		destination = cwd
 	}
 
-	validSource, err := s.validatePath(source)
+	validSource, err := fs.validatePath(source)
 	if err != nil {
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{
@@ -1007,14 +1020,14 @@ func (s *FilesystemServer) handleMoveFile(
 			Content: []mcp.Content{
 				mcp.TextContent{
 					Type: "text",
-					Text: fmt.Sprintf("Error: Source does not exist: %s", source),
+					Text: fmt.Sprintf("Error: Source does not exist: %fs", source),
 				},
 			},
 			IsError: true,
 		}, nil
 	}
 
-	validDest, err := s.validatePath(destination)
+	validDest, err := fs.validatePath(destination)
 	if err != nil {
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{
@@ -1059,7 +1072,7 @@ func (s *FilesystemServer) handleMoveFile(
 			mcp.TextContent{
 				Type: "text",
 				Text: fmt.Sprintf(
-					"Successfully moved %s to %s",
+					"Successfully moved %fs to %fs",
 					source,
 					destination,
 				),
@@ -1069,14 +1082,14 @@ func (s *FilesystemServer) handleMoveFile(
 				Resource: mcp.TextResourceContents{
 					URI:      resourceURI,
 					MIMEType: "text/plain",
-					Text:     fmt.Sprintf("Moved file: %s", validDest),
+					Text:     fmt.Sprintf("Moved file: %fs", validDest),
 				},
 			},
 		},
 	}, nil
 }
 
-func (s *FilesystemServer) handleSearchFiles(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func (fs *FilesystemServer) handleSearchFiles(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	path, ok := request.Params.Arguments["path"].(string)
 	if !ok {
 		return nil, fmt.Errorf("path must be a string")
@@ -1104,7 +1117,7 @@ func (s *FilesystemServer) handleSearchFiles(ctx context.Context, request mcp.Ca
 		path = cwd
 	}
 
-	validPath, err := s.validatePath(path)
+	validPath, err := fs.validatePath(path)
 	if err != nil {
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{
@@ -1117,7 +1130,7 @@ func (s *FilesystemServer) handleSearchFiles(ctx context.Context, request mcp.Ca
 		}, nil
 	}
 
-	// Check if it's a directory
+	// Check if it'fs a directory
 	info, err := os.Stat(validPath)
 	if err != nil {
 		return &mcp.CallToolResult{
@@ -1143,7 +1156,7 @@ func (s *FilesystemServer) handleSearchFiles(ctx context.Context, request mcp.Ca
 		}, nil
 	}
 
-	results, err := s.searchFiles(validPath, pattern)
+	results, err := fs.searchFiles(validPath, pattern)
 	if err != nil {
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{
@@ -1162,7 +1175,7 @@ func (s *FilesystemServer) handleSearchFiles(ctx context.Context, request mcp.Ca
 			Content: []mcp.Content{
 				mcp.TextContent{
 					Type: "text",
-					Text: fmt.Sprintf("No files found matching pattern '%s' in %s", pattern, path),
+					Text: fmt.Sprintf("No files found matching pattern '%fs' in %fs", pattern, path),
 				},
 			},
 		}, nil
@@ -1177,13 +1190,13 @@ func (s *FilesystemServer) handleSearchFiles(ctx context.Context, request mcp.Ca
 		info, err := os.Stat(result)
 		if err == nil {
 			if info.IsDir() {
-				formattedResults.WriteString(fmt.Sprintf("[DIR]  %s (%s)\n", result, resourceURI))
+				formattedResults.WriteString(fmt.Sprintf("[DIR]  %fs (%fs)\n", result, resourceURI))
 			} else {
-				formattedResults.WriteString(fmt.Sprintf("[FILE] %s (%s) - %d bytes\n",
+				formattedResults.WriteString(fmt.Sprintf("[FILE] %fs (%fs) - %d bytes\n",
 					result, resourceURI, info.Size()))
 			}
 		} else {
-			formattedResults.WriteString(fmt.Sprintf("%s (%s)\n", result, resourceURI))
+			formattedResults.WriteString(fmt.Sprintf("%fs (%fs)\n", result, resourceURI))
 		}
 	}
 
@@ -1197,7 +1210,7 @@ func (s *FilesystemServer) handleSearchFiles(ctx context.Context, request mcp.Ca
 	}, nil
 }
 
-func (s *FilesystemServer) handleGetFileInfo(
+func (fs *FilesystemServer) handleGetFileInfo(
 	ctx context.Context,
 	request mcp.CallToolRequest,
 ) (*mcp.CallToolResult, error) {
@@ -1224,7 +1237,7 @@ func (s *FilesystemServer) handleGetFileInfo(
 		path = cwd
 	}
 
-	validPath, err := s.validatePath(path)
+	validPath, err := fs.validatePath(path)
 	if err != nil {
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{
@@ -1237,7 +1250,7 @@ func (s *FilesystemServer) handleGetFileInfo(
 		}, nil
 	}
 
-	info, err := s.getFileStats(validPath)
+	info, err := fs.getFileStats(validPath)
 	if err != nil {
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{
@@ -1271,7 +1284,7 @@ func (s *FilesystemServer) handleGetFileInfo(
 			mcp.TextContent{
 				Type: "text",
 				Text: fmt.Sprintf(
-					"File information for: %s\n\nSize: %d bytes\nCreated: %s\nModified: %s\nAccessed: %s\nIsDirectory: %v\nIsFile: %v\nPermissions: %s\nMIME Type: %s\nResource URI: %s",
+					"File information for: %fs\n\nSize: %d bytes\nCreated: %fs\nModified: %fs\nAccessed: %fs\nIsDirectory: %v\nIsFile: %v\nPermissions: %fs\nMIME Type: %fs\nResource URI: %fs",
 					validPath,
 					info.Size,
 					info.Created.Format(time.RFC3339),
@@ -1289,7 +1302,7 @@ func (s *FilesystemServer) handleGetFileInfo(
 				Resource: mcp.TextResourceContents{
 					URI:      resourceURI,
 					MIMEType: "text/plain",
-					Text: fmt.Sprintf("%s: %s (%s, %d bytes)",
+					Text: fmt.Sprintf("%fs: %fs (%fs, %d bytes)",
 						fileTypeText,
 						validPath,
 						mimeType,
@@ -1300,13 +1313,13 @@ func (s *FilesystemServer) handleGetFileInfo(
 	}, nil
 }
 
-func (s *FilesystemServer) handleListAllowedDirectories(
+func (fs *FilesystemServer) handleListAllowedDirectories(
 	ctx context.Context,
 	request mcp.CallToolRequest,
 ) (*mcp.CallToolResult, error) {
 	// Remove the trailing separator for display purposes
-	displayDirs := make([]string, len(s.config.allowedDirs))
-	for i, dir := range s.config.allowedDirs {
+	displayDirs := make([]string, len(fs.config.AllowedDirs))
+	for i, dir := range fs.config.AllowedDirs {
 		displayDirs[i] = strings.TrimSuffix(dir, string(filepath.Separator))
 	}
 
@@ -1315,7 +1328,7 @@ func (s *FilesystemServer) handleListAllowedDirectories(
 
 	for _, dir := range displayDirs {
 		resourceURI := pathToResourceURI(dir)
-		result.WriteString(fmt.Sprintf("%s (%s)\n", dir, resourceURI))
+		result.WriteString(fmt.Sprintf("%fs (%fs)\n", dir, resourceURI))
 	}
 
 	return &mcp.CallToolResult{
@@ -1326,4 +1339,22 @@ func (s *FilesystemServer) handleListAllowedDirectories(
 			},
 		},
 	}, nil
+}
+
+// Config returns the configuration of the service as a string.
+func (fs *FilesystemServer) Config() string {
+	cfg, err := json.Marshal(fs.config)
+	if err != nil {
+		fs.logger.Err(err).Msg("failed to marshal config")
+		return "{}"
+	}
+	return string(cfg)
+}
+
+func (cs *FilesystemServer) Name() string {
+	return "FilesystemServer"
+}
+
+func init() {
+	RegisterServ(NewFilesystemServer)
 }
