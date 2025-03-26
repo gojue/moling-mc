@@ -323,7 +323,7 @@ func (bs *BrowserServer) handleHover(ctx context.Context, request mcp.CallToolRe
 		Content: []mcp.Content{
 			mcp.TextContent{
 				Type: "text",
-				Text: fmt.Sprintf("Hovered over element %s, result:%d", selector, res),
+				Text: fmt.Sprintf("Hovered over element %s, result:%t", selector, res),
 			},
 		},
 	}, nil

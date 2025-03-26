@@ -23,11 +23,24 @@ import (
 // CommandConfig represents the configuration for allowed commands.
 type CommandConfig struct {
 	// AllowedCommands is a list of allowed commands.
-	AllowedCommands []string `json:"allowed_commands,omitempty"`
+	AllowedCommands []string `json:"allowed_commands"`
 }
+
+var (
+	allowedCmdDefault = []string{
+		"ls", "cat", "echo", "pwd", "head", "tail", "grep", "find", "stat", "df",
+		"du", "free", "top", "ps", "uptime", "who", "w", "last", "uname", "hostname",
+		"ifconfig", "netstat", "ping", "traceroute", "route", "ip", "ss", "lsof", "vmstat",
+		"iostat", "mpstat", "sar", "uptime", "cut", "sort", "uniq", "wc", "awk", "sed",
+		"diff", "cmp", "comm", "file", "basename", "dirname", "chmod", "chown",
+	}
+)
 
 // NewCommandConfig creates a new CommandConfig with the given allowed commands.
 func NewCommandConfig(commands []string) *CommandConfig {
+	if len(commands) == 0 {
+		commands = allowedCmdDefault
+	}
 	return &CommandConfig{
 		AllowedCommands: commands,
 	}

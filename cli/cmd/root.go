@@ -18,13 +18,12 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"github.com/gojue/moling/cli/cobrautl"
 	"github.com/gojue/moling/services"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 	"os"
-	"time"
+	"path/filepath"
 )
 
 const (
@@ -102,24 +101,26 @@ func init() {
 	// when this action is called directly.
 	rootCmd.PersistentFlags().StringVarP(&mlConfig.ConfigFile, "config_file", "c", "", "MoLing Config File Path")
 	//rootCmd.PersistentFlags().StringVar(&mlConfig.DataPath, "root-path", "", "MoLing Data Path")
-	//rootCmd.PersistentFlags().StringSliceVar(&mlConfig.AllowDir, "allow-dir", []string{"/tmp"}, "allow dir")
+	rootCmd.PersistentFlags().StringSliceVar(&mlConfig.AllowDir, "allow-dir", []string{"/tmp"}, "allow dir")
 	//rootCmd.PersistentFlags().StringSliceVar(&mlConfig.AllowCommand, "allow-cmd", []string{"ifconfig", "whomai", "ip", "ss", "ls", "pwd", "cat", "echo", "date", "whoami", "uname", "top", "ps", "df", "free", "uptime", "ifconfig", "ip", "netstat", "ping", "traceroute", "curl", "wget", "dig", "nslookup", "ssh", "head"}, "allow commands")
 	rootCmd.SilenceUsage = true
 }
 
 // initLogger init logger
-func initLogger(addr string) zerolog.Logger {
+func initLogger(mlDataPath string) zerolog.Logger {
 	var logger zerolog.Logger
 	var err error
-	consoleWriter := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}
-	logger = zerolog.New(consoleWriter).With().Timestamp().Logger()
+	logFile := filepath.Join(mlDataPath, "logs", "moling.log")
+	//consoleWriter := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}
+	//logger = zerolog.New(consoleWriter).With().Timestamp().Logger()
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	var f *os.File
-	f, err = os.Create(addr)
+	f, err = os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600)
 	if err == nil && f != nil {
-		multi := zerolog.MultiLevelWriter(consoleWriter, f)
-		logger = zerolog.New(multi).With().Timestamp().Logger()
+		//multi := zerolog.MultiLevelWriter(consoleWriter, f)
+		//logger = zerolog.New(multi).With().Timestamp().Logger()
+		logger = zerolog.New(f).With().Timestamp().Logger()
 	} else {
 		logger.Warn().Err(err).Msg("failed to create multiLogger")
 	}
@@ -128,7 +129,7 @@ func initLogger(addr string) zerolog.Logger {
 }
 
 func mlsCommandFunc(command *cobra.Command, args []string) error {
-	loger := initLogger(fmt.Sprintf("%s/logs/moling_debug.log", mlConfig.DataPath))
+	loger := initLogger(mlConfig.DataPath)
 	mlConfig.SetLogger(loger)
 
 	ctx := context.WithValue(context.Background(), services.MoLingConfigKey, mlConfig)

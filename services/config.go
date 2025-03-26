@@ -25,12 +25,12 @@ type Config interface {
 }
 
 type MoLingConfig struct {
-	ConfigFile   string   `json:"config_file"`   // The path to the configuration file.
-	DataPath     string   `json:"data_path"`     // The data path for the server, used for storing files. MacOS: /Users/username/.moling, Linux: /home/username/.moling, Windows: C:\Users\username\.moling
-	AllowDir     []string `json:"allow_dir"`     // The directories that are allowed to be accessed by the server.
-	AllowCommand []string `json:"allow_command"` // The commands that are allowed to be executed by the server.
-	Version      string   `json:"version"`       // The version of the MoLing server.
-	logger       zerolog.Logger
+	ConfigFile string   `json:"config_file"` // The path to the configuration file.
+	DataPath   string   `json:"data_path"`   // The data path for the server, used for storing files. MacOS: /Users/username/.moling, Linux: /home/username/.moling, Windows: C:\Users\username\.moling
+	AllowDir   []string `json:"allow_dir"`   // The directories that are allowed to be accessed by the server.
+	//AllowCommand []string `json:"allow_command"` // The commands that are allowed to be executed by the server.
+	Version string `json:"version"` // The version of the MoLing server.
+	logger  zerolog.Logger
 }
 
 func (cfg *MoLingConfig) Check() error {

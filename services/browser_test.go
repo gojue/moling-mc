@@ -18,24 +18,48 @@ package services
 
 import (
 	"context"
+	"github.com/rs/zerolog"
+	"os"
+	"path/filepath"
 	"testing"
-	"time"
 )
 
-func TestBrowserServer(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-
-	cfg := &BrowserConfig{
-		Headless:        true,
-		Timeout:         30,
-		UserAgent:       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
-		DefaultLanguage: "en-US",
-		URLTimeout:      10,
-		CSSTimeout:      10,
+// initTestEnv initializes the test environment by creating a temporary log file and setting up the logger.
+func initTestEnv() (zerolog.Logger, context.Context, error) {
+	logFile := filepath.Join(os.TempDir(), "moling.log")
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	var logger zerolog.Logger
+	f, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600)
+	if err != nil {
+		return zerolog.Logger{}, nil, err
 	}
+	logger = zerolog.New(f).With().Timestamp().Logger()
+	mlConfig := &MoLingConfig{
+		ConfigFile: "test_config.json",
+		DataPath:   os.TempDir(),
+	}
+	ctx := context.WithValue(context.Background(), MoLingConfigKey, mlConfig)
+	ctx = context.WithValue(ctx, MoLingLoggerKey, logger)
+	return logger, ctx, nil
+}
 
-	_, err := NewBrowserServer(ctx, cfg)
+func TestBrowserServer(t *testing.T) {
+	//
+	//cfg := &BrowserConfig{
+	//	Headless:        true,
+	//	Timeout:         30,
+	//	UserAgent:       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+	//	DefaultLanguage: "en-US",
+	//	URLTimeout:      10,
+	//	CSSTimeout:      10,
+	//}
+	logger, ctx, err := initTestEnv()
+	if err != nil {
+		t.Fatalf("Failed to initialize test environment: %v", err)
+	}
+	logger.Info().Msg("TestBrowserServer")
+	_, err = NewBrowserServer(ctx, []string{"--headless"})
 	if err != nil {
 		t.Fatalf("Failed to create BrowserServer: %v", err)
 	}

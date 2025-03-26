@@ -27,21 +27,31 @@ import (
 
 var configCmd = &cobra.Command{
 	Use:   "config",
-	Short: "Show current configuration",
-	Long: `Show the current service configuration. You can refer to the configuration file to modify the configuration.
+	Short: "Show the configuration of the current service list",
+	Long: `Show the configuration of the current service list. You can refer to the configuration file to modify the configuration.
 `,
 	RunE: ConfigCommandFunc,
 }
 
-// bashCommandFunc executes the "bash" command.
+var save bool
+
+// ConfigCommandFunc executes the "config" command.
 func ConfigCommandFunc(command *cobra.Command, args []string) error {
-	loger := initLogger(fmt.Sprintf("%s/logs/moling_debug.log", mlConfig.DataPath))
+	loger := initLogger(mlConfig.DataPath)
 	mlConfig.SetLogger(loger)
 	loger.Info().Msg("Start to show config")
 	ctx := context.WithValue(context.Background(), services.MoLingConfigKey, mlConfig)
 	ctx = context.WithValue(ctx, services.MoLingLoggerKey, loger)
 	bf := bytes.Buffer{}
 	bf.WriteString("\n{\n")
+
+	// 写入GlobalConfig
+	mlConfigJson, err := json.Marshal(mlConfig)
+	if err != nil {
+		return fmt.Errorf("Error marshaling GlobalConfig: %v\n", err)
+	}
+	bf.WriteString("\t\"MoLingConfig\":\n")
+	bf.WriteString(fmt.Sprintf("\t%s,\n", mlConfigJson))
 	first := true
 	for _, nsv := range services.ServiceList() {
 		srv, err := nsv(ctx, args)
@@ -56,10 +66,9 @@ func ConfigCommandFunc(command *cobra.Command, args []string) error {
 		first = false
 	}
 	bf.WriteString("}\n")
-
 	// 解析原始 JSON 字符串
 	var data interface{}
-	err := json.Unmarshal(bf.Bytes(), &data)
+	err = json.Unmarshal(bf.Bytes(), &data)
 	if err != nil {
 		return fmt.Errorf("Error unmarshaling JSON: %v\n", err)
 	}
@@ -71,10 +80,11 @@ func ConfigCommandFunc(command *cobra.Command, args []string) error {
 
 	}
 
-	loger.Printf("Config: \n%s", formattedJson)
+	loger.Info().Msgf("Config: \n%s", formattedJson)
 	return nil
 }
 
 func init() {
+	configCmd.PersistentFlags().BoolVarP(&save, "save", "s", false, "Save configuration to file")
 	rootCmd.AddCommand(configCmd)
 }

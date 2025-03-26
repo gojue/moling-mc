@@ -24,7 +24,7 @@ import (
 
 // FileSystemConfig represents the configuration for the file system.
 type FileSystemConfig struct {
-	AllowedDirs []string `json:"allowed_dirs,omitempty"` // AllowedDirs is a list of allowed directories.
+	AllowedDirs []string `json:"allowed_dirs"` // AllowedDirs is a list of allowed directories.
 }
 
 // NewFileSystemConfig creates a new FileSystemConfig with the given allowed directories.

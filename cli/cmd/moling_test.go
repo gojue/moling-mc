@@ -21,9 +21,13 @@ import (
 )
 
 func TestNewMLServer(t *testing.T) {
-	ctx := context.Background()
+	loger := initLogger(mlConfig.DataPath)
+	mlConfig.SetLogger(loger)
+
+	ctx := context.WithValue(context.Background(), services.MoLingConfigKey, mlConfig)
+	ctx = context.WithValue(ctx, services.MoLingLoggerKey, loger)
 	// Create a new server with the filesystem service
-	fs, err := services.NewFilesystemServer(ctx, services.NewFileSystemConfig([]string{"/tmp/"}))
+	fs, err := services.NewFilesystemServer(ctx, []string{"/tmp/"})
 	if err != nil {
 		t.Errorf("Failed to create filesystem server: %v", err)
 	}
