@@ -1352,6 +1352,11 @@ func (fss *FilesystemServer) Name() string {
 	return "FilesystemServer"
 }
 
+func (bs *FilesystemServer) Close() error {
+	// Cancel the context to stop the browser
+	return nil
+}
+
 func init() {
 	RegisterServ(NewFilesystemServer)
 }

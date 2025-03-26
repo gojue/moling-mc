@@ -169,6 +169,11 @@ func (cs *CommandServer) Name() string {
 	return "CommandServer"
 }
 
+func (bs *CommandServer) Close() error {
+	// Cancel the context to stop the browser
+	return nil
+}
+
 func init() {
 	RegisterServ(NewCommandServer)
 }

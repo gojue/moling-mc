@@ -21,12 +21,13 @@ import (
 )
 
 type MoLingServer struct {
-	ctx      context.Context
-	server   *server.MCPServer
-	services []services.Service
+	ctx        context.Context
+	server     *server.MCPServer
+	services   []services.Service
+	listenAddr string // SSE mode listen address, if empty, use STUDIO mode.
 }
 
-func NewMoLingServer(ctx context.Context, services []services.Service) (*MoLingServer, error) {
+func NewMoLingServer(ctx context.Context, services []services.Service, addr string) (*MoLingServer, error) {
 	mcpServer := server.NewMCPServer(
 		MCPServerName,
 		GitVersion,
@@ -35,9 +36,10 @@ func NewMoLingServer(ctx context.Context, services []services.Service) (*MoLingS
 		server.WithPromptCapabilities(true),
 	)
 	ms := &MoLingServer{
-		ctx:      ctx,
-		server:   mcpServer,
-		services: services,
+		ctx:        ctx,
+		server:     mcpServer,
+		services:   services,
+		listenAddr: addr,
 	}
 	err := ms.init()
 	return ms, err
@@ -80,5 +82,9 @@ func (m *MoLingServer) loadService(srv services.Service) error {
 }
 
 func (s *MoLingServer) Serve() error {
+	if s.listenAddr != "" {
+		return server.NewSSEServer(s.server, server.WithBaseURL(s.listenAddr),
+			server.WithBasePath("/mcp")).Start(s.listenAddr)
+	}
 	return server.ServeStdio(s.server)
 }

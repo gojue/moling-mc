@@ -48,7 +48,12 @@ type Service interface {
 
 	// Config returns the configuration of the service as a string.
 	Config() string
+
+	// Name returns the name of the service.
 	Name() string
+
+	// Close closes the service and releases any resources it holds.
+	Close() error
 }
 
 type PromptEntry struct {

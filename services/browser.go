@@ -59,15 +59,21 @@ func NewBrowserServer(ctx context.Context, args []string) (Service, error) {
 	opts := []chromedp.ExecAllocatorOption{
 		chromedp.UserAgent(bc.UserAgent),
 		chromedp.Flag("lang", bc.DefaultLanguage),
-		chromedp.Flag("headless", bc.Headless),
-		chromedp.Flag("user-data-dir", filepath.Join(globalConf.DataPath, "browser")),
+		//chromedp.Flag("headless", bc.Headless),
 		chromedp.CombinedOutput(logger),
 		chromedp.WindowSize(1312, 848),
+		chromedp.Flag("disable-gpu", true),
+		//chromedp.DisableGPU,
+		chromedp.Headless,
+		chromedp.UserDataDir(filepath.Join(globalConf.DataPath, "browser")),
 	}
+	//chromedp.NewBrowser(bs.ctx, url, chromedp.WithBrowserErrorf(bs.logger.Printf),
+	//	chromedp.WithDialTimeout(time.Second*time.Duration(bs.config.Timeout)))
 	bs.ctx, bs.cancel = chromedp.NewExecAllocator(ctx, opts...)
 	bs.ctx, bs.cancel = chromedp.NewContext(bs.ctx,
 		chromedp.WithErrorf(logger.Printf),
 	)
+	defer bs.cancel()
 	err := bs.init()
 	if err != nil {
 		return nil, err
@@ -153,6 +159,7 @@ func (bs *BrowserServer) handleNavigate(ctx context.Context, request mcp.CallToo
 	if !ok {
 		return nil, fmt.Errorf("url must be a string")
 	}
+
 	err := chromedp.Run(bs.ctx, chromedp.Navigate(url))
 	if err != nil {
 		return &mcp.CallToolResult{
@@ -350,9 +357,10 @@ func (bs *BrowserServer) handleEvaluate(ctx context.Context, request mcp.CallToo
 }
 
 func (bs *BrowserServer) Close() error {
-	// Cancel the context to stop the browser
 	bs.cancel()
-	return nil
+
+	// Cancel the context to stop the browser
+	return chromedp.Cancel(bs.ctx)
 }
 
 // Config returns the configuration of the service as a string.

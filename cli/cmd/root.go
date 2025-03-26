@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"github.com/gojue/moling/cli/cobrautl"
 	"github.com/gojue/moling/services"
 	"github.com/rs/zerolog"
@@ -41,14 +42,16 @@ Moling is a computer-based MCP Server that implements system interaction through
 Requiring no installation of any dependencies, Moling can be run directly and is compatible with multiple operating systems, including Windows, Linux, and MacOS. This eliminates the hassle of dealing with environment conflicts involving Node.js, Python, and other development environments.
 
 Usage:
-  moling --allow-dir="/tmp,/home/user"
+  moling config
+  moling -l 127.0.0:8080
   moling -h
 `
 	CliDescriptionLongZh = `Moling（魔灵） 是一个computer-use的MCP Server，基于操作系统API实现了系统交互，可以实现文件系统的读写、合并、统计、聚合等操作，也可以执行系统命令操作。是一个无需任何依赖的本地办公自动化助手。
 没有任何安装依赖，直接运行，兼容Windows、Linux、MacOS等操作系统。再也不用苦恼NodeJS、Python等环境冲突等问题了。
 
 Usage:
-  moling --allow-dir="/tmp,/home/user"
+  moling config
+  moling -l 127.0.0:8080
   moling -h
 `
 )
@@ -59,6 +62,7 @@ var (
 		Version:  GitVersion,
 		DataPath: "/Users/cfc4n/.moling",
 	}
+	listenAddr string
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -101,8 +105,8 @@ func init() {
 	// when this action is called directly.
 	rootCmd.PersistentFlags().StringVarP(&mlConfig.ConfigFile, "config_file", "c", "", "MoLing Config File Path")
 	//rootCmd.PersistentFlags().StringVar(&mlConfig.DataPath, "root-path", "", "MoLing Data Path")
-	rootCmd.PersistentFlags().StringSliceVar(&mlConfig.AllowDir, "allow-dir", []string{"/tmp"}, "allow dir")
-	//rootCmd.PersistentFlags().StringSliceVar(&mlConfig.AllowCommand, "allow-cmd", []string{"ifconfig", "whomai", "ip", "ss", "ls", "pwd", "cat", "echo", "date", "whoami", "uname", "top", "ps", "df", "free", "uptime", "ifconfig", "ip", "netstat", "ping", "traceroute", "curl", "wget", "dig", "nslookup", "ssh", "head"}, "allow commands")
+	//rootCmd.PersistentFlags().StringSliceVar(&mlConfig.AllowDir, "allow-dir", []string{"/tmp"}, "allow dir")
+	rootCmd.PersistentFlags().StringVarP(&listenAddr, "listen", "l", "", "listen address,aka SSE mode. if not set, use STDIO mode")
 	rootCmd.SilenceUsage = true
 }
 
@@ -117,13 +121,10 @@ func initLogger(mlDataPath string) zerolog.Logger {
 	zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	var f *os.File
 	f, err = os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600)
-	if err == nil && f != nil {
-		//multi := zerolog.MultiLevelWriter(consoleWriter, f)
-		//logger = zerolog.New(multi).With().Timestamp().Logger()
-		logger = zerolog.New(f).With().Timestamp().Logger()
-	} else {
-		logger.Warn().Err(err).Msg("failed to create multiLogger")
+	if err != nil {
+		panic(fmt.Sprintf("failed to open log file %s: %v", logFile, err))
 	}
+	logger = zerolog.New(f).With().Timestamp().Logger()
 	logger.Info().Str("ServerName", MCPServerName).Str("version", GitVersion).Msg("start")
 	return logger
 }
@@ -143,10 +144,15 @@ func mlsCommandFunc(command *cobra.Command, args []string) error {
 			return err
 		}
 		srvs = append(srvs, srv)
+		defer func() {
+			if err := srv.Close(); err != nil {
+				loger.Error().Err(err).Msgf("failed to close service %s", srv.Name())
+			}
+		}()
 	}
 
 	// MCPServer
-	srv, err := NewMoLingServer(ctx, srvs)
+	srv, err := NewMoLingServer(ctx, srvs, listenAddr)
 	if err != nil {
 		return err
 	}
