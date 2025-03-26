@@ -244,7 +244,7 @@ func (bs *BrowserServer) handleScreenshot(ctx context.Context, request mcp.CallT
 	}
 
 	//
-	newName := filepath.Join(bs.config.DataPath, fmt.Sprintf("%d_%s", rand.Int(), name))
+	newName := filepath.Join(bs.config.DataPath, fmt.Sprintf("%s_%d.png", name, rand.Int()))
 	err = os.WriteFile(newName, buf, 0644)
 	if err != nil {
 		return &mcp.CallToolResult{
@@ -268,13 +268,13 @@ func (bs *BrowserServer) handleScreenshot(ctx context.Context, request mcp.CallT
 			//	MIMEType: "image/png",
 			//	Data:     base64.StdEncoding.EncodeToString(buf),
 			//},
-			mcp.EmbeddedResource{
-				Type: "image/png",
-				Resource: mcp.BlobResourceContents{
-					URI:      newName,
-					MIMEType: "image/png",
-				},
-			},
+			//mcp.EmbeddedResource{
+			//	Type: "image/png",
+			//	Resource: mcp.BlobResourceContents{
+			//		URI:      newName,
+			//		MIMEType: "image/png",
+			//	},
+			//},
 		},
 	}, nil
 }
