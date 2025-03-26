@@ -29,6 +29,7 @@ type BrowserConfig struct {
 	DefaultLanguage string `json:"default_language"`
 	URLTimeout      int    `json:"url_timeout"`
 	CSSTimeout      int    `json:"css_timeout"`
+	DataPath        string `json:"data_path"` // DataPath is the path to the data directory.
 	//logger          *zerolog.Logger
 }
 
@@ -45,6 +46,7 @@ func (cfg *BrowserConfig) Check() error {
 	return nil
 }
 
+// NewBrowserConfig creates a new BrowserConfig with default values.
 func NewBrowserConfig() *BrowserConfig {
 	return &BrowserConfig{
 		Headless:        false,
@@ -53,5 +55,6 @@ func NewBrowserConfig() *BrowserConfig {
 		CSSTimeout:      10,
 		UserAgent:       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3 (GoJue MoLing)",
 		DefaultLanguage: "en-US",
+		DataPath:        "/Users/cfc4n/Downloads/moling_data",
 	}
 }

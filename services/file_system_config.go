@@ -22,15 +22,27 @@ import (
 	"path/filepath"
 )
 
+var (
+	allowedDirsDefault = []string{
+		"/Users/cfc4n/Downloads/moling_data",
+	}
+)
+
 // FileSystemConfig represents the configuration for the file system.
 type FileSystemConfig struct {
 	AllowedDirs []string `json:"allowed_dirs"` // AllowedDirs is a list of allowed directories.
+	FSRootPath  string   `json:"fs_root_path"` // FSRootPath is the root path for the file system.
 }
 
 // NewFileSystemConfig creates a new FileSystemConfig with the given allowed directories.
 func NewFileSystemConfig(path []string) *FileSystemConfig {
+	if len(path) == 0 {
+		path = allowedDirsDefault
+	}
+
 	return &FileSystemConfig{
 		AllowedDirs: path,
+		FSRootPath:  path[0],
 	}
 }
 

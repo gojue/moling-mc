@@ -24,6 +24,7 @@ import (
 	"github.com/chromedp/chromedp"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/rs/zerolog"
+	"math/rand"
 	"os"
 	"path/filepath"
 )
@@ -54,8 +55,12 @@ func NewBrowserServer(ctx context.Context, args []string) (Service, error) {
 		config: bc,
 	}
 	bs.logger = logger.Hook(loggerNameHook)
-
 	globalConf := ctx.Value(MoLingConfigKey).(*MoLingConfig)
+	userDataDir := filepath.Join(globalConf.BasePath, "browser")
+	err := bs.initBrowser(userDataDir)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize browser: %v", err)
+	}
 	opts := []chromedp.ExecAllocatorOption{
 		chromedp.UserAgent(bc.UserAgent),
 		chromedp.Flag("lang", bc.DefaultLanguage),
@@ -65,7 +70,7 @@ func NewBrowserServer(ctx context.Context, args []string) (Service, error) {
 		chromedp.Flag("disable-gpu", true),
 		//chromedp.DisableGPU,
 		chromedp.Headless,
-		chromedp.UserDataDir(filepath.Join(globalConf.DataPath, "browser")),
+		chromedp.UserDataDir(userDataDir),
 	}
 	//chromedp.NewBrowser(bs.ctx, url, chromedp.WithBrowserErrorf(bs.logger.Printf),
 	//	chromedp.WithDialTimeout(time.Second*time.Duration(bs.config.Timeout)))
@@ -73,8 +78,7 @@ func NewBrowserServer(ctx context.Context, args []string) (Service, error) {
 	bs.ctx, bs.cancel = chromedp.NewContext(bs.ctx,
 		chromedp.WithErrorf(logger.Printf),
 	)
-	defer bs.cancel()
-	err := bs.init()
+	err = bs.init()
 	if err != nil {
 		return nil, err
 	}
@@ -182,6 +186,30 @@ func (bs *BrowserServer) handleNavigate(ctx context.Context, request mcp.CallToo
 	}, nil
 }
 
+// init initializes the browser server by creating the user data directory.
+func (bs *BrowserServer) initBrowser(userDataDir string) error {
+	_, err := os.Stat(userDataDir)
+	if err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("failed to stat user data directory: %v", err)
+	}
+
+	// Check if the directory exists
+	if err == nil {
+		// Directory exists, clean it up
+		err = os.RemoveAll(userDataDir)
+		if err != nil {
+			return fmt.Errorf("failed to remove user data directory: %v", err)
+		}
+	}
+	// Create the directory
+	err = os.MkdirAll(userDataDir, 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create user data directory: %v", err)
+	}
+	return nil
+}
+
+// handleScreenshot handles the screenshot action.
 func (bs *BrowserServer) handleScreenshot(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	name, ok := request.Params.Arguments["name"].(string)
 	if !ok {
@@ -215,8 +243,9 @@ func (bs *BrowserServer) handleScreenshot(ctx context.Context, request mcp.CallT
 		}, nil
 	}
 
-	// TODO
-	err = os.WriteFile(fmt.Sprintf("/Users/cfc4n/Downloads/%s.png", name), buf, 0644)
+	//
+	newName := filepath.Join(bs.config.DataPath, fmt.Sprintf("%d_%s", rand.Int(), name))
+	err = os.WriteFile(newName, buf, 0644)
 	if err != nil {
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{
@@ -232,7 +261,7 @@ func (bs *BrowserServer) handleScreenshot(ctx context.Context, request mcp.CallT
 		Content: []mcp.Content{
 			mcp.TextContent{
 				Type: "text",
-				Text: fmt.Sprintf("Screenshot saved as /Users/cfc4n/Downloads/%s.png", name),
+				Text: newName,
 			},
 			//mcp.ImageContent{
 			//	Type:     "image",
@@ -242,7 +271,7 @@ func (bs *BrowserServer) handleScreenshot(ctx context.Context, request mcp.CallT
 			mcp.EmbeddedResource{
 				Type: "image/png",
 				Resource: mcp.BlobResourceContents{
-					URI:      fmt.Sprintf("/Users/cfc4n/Downloads/%s.png", name),
+					URI:      newName,
 					MIMEType: "image/png",
 				},
 			},

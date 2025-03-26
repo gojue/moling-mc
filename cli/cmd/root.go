@@ -60,7 +60,7 @@ var (
 	GitVersion = "linux-arm64-202503222008-v0.0.1"
 	mlConfig   = &services.MoLingConfig{
 		Version:  GitVersion,
-		DataPath: "/Users/cfc4n/.moling",
+		BasePath: "/Users/cfc4n/.moling",
 	}
 	listenAddr string
 )
@@ -104,7 +104,7 @@ func init() {
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.PersistentFlags().StringVarP(&mlConfig.ConfigFile, "config_file", "c", "", "MoLing Config File Path")
-	//rootCmd.PersistentFlags().StringVar(&mlConfig.DataPath, "root-path", "", "MoLing Data Path")
+	//rootCmd.PersistentFlags().StringVar(&mlConfig.BasePath, "root-path", "", "MoLing Data Path")
 	//rootCmd.PersistentFlags().StringSliceVar(&mlConfig.AllowDir, "allow-dir", []string{"/tmp"}, "allow dir")
 	rootCmd.PersistentFlags().StringVarP(&listenAddr, "listen", "l", "", "listen address,aka SSE mode. if not set, use STDIO mode")
 	rootCmd.SilenceUsage = true
@@ -130,25 +130,21 @@ func initLogger(mlDataPath string) zerolog.Logger {
 }
 
 func mlsCommandFunc(command *cobra.Command, args []string) error {
-	loger := initLogger(mlConfig.DataPath)
+	loger := initLogger(mlConfig.BasePath)
 	mlConfig.SetLogger(loger)
 
 	ctx := context.WithValue(context.Background(), services.MoLingConfigKey, mlConfig)
 	ctx = context.WithValue(ctx, services.MoLingLoggerKey, loger)
 
 	var srvs []services.Service
-
+	var closers []func() error
 	for _, nsv := range services.ServiceList() {
 		srv, err := nsv(ctx, args)
 		if err != nil {
 			return err
 		}
 		srvs = append(srvs, srv)
-		defer func() {
-			if err := srv.Close(); err != nil {
-				loger.Error().Err(err).Msgf("failed to close service %s", srv.Name())
-			}
-		}()
+		closers = append(closers, srv.Close)
 	}
 
 	// MCPServer
@@ -157,5 +153,18 @@ func mlsCommandFunc(command *cobra.Command, args []string) error {
 		return err
 	}
 	err = srv.Serve()
+	if err != nil {
+		return err
+	}
+
+	// close all services
+	for i, closer := range closers {
+		err = closer()
+		if err != nil {
+			loger.Error().Err(err).Msgf("failed to close service %d", i)
+		} else {
+			loger.Info().Msgf("service %d closed", i)
+		}
+	}
 	return err
 }

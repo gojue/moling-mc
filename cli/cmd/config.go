@@ -37,7 +37,7 @@ var save bool
 
 // ConfigCommandFunc executes the "config" command.
 func ConfigCommandFunc(command *cobra.Command, args []string) error {
-	loger := initLogger(mlConfig.DataPath)
+	loger := initLogger(mlConfig.BasePath)
 	mlConfig.SetLogger(loger)
 	loger.Info().Msg("Start to show config")
 	ctx := context.WithValue(context.Background(), services.MoLingConfigKey, mlConfig)

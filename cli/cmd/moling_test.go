@@ -21,7 +21,7 @@ import (
 )
 
 func TestNewMLServer(t *testing.T) {
-	loger := initLogger(mlConfig.DataPath)
+	loger := initLogger(mlConfig.BasePath)
 	mlConfig.SetLogger(loger)
 
 	ctx := context.WithValue(context.Background(), services.MoLingConfigKey, mlConfig)
@@ -34,7 +34,7 @@ func TestNewMLServer(t *testing.T) {
 	srvs := []services.Service{
 		fs,
 	}
-	srv, err := NewMoLingServer(ctx, srvs)
+	srv, err := NewMoLingServer(ctx, srvs, "")
 	if err != nil {
 		t.Errorf("Failed to create server: %v", err)
 	}

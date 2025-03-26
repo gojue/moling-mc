@@ -415,24 +415,24 @@ func (fss *FilesystemServer) handleReadFile(
 		return nil, fmt.Errorf("path must be a string")
 	}
 
-	// Handle empty or relative paths like "." or "./" by converting to absolute path
-	if path == "." || path == "./" {
-		// Get current working directory
-		cwd, err := os.Getwd()
-		if err != nil {
-			return &mcp.CallToolResult{
-				Content: []mcp.Content{
-					mcp.TextContent{
-						Type: "text",
-						Text: fmt.Sprintf("Error resolving current directory: %v", err),
-					},
-				},
-				IsError: true,
-			}, nil
-		}
-		path = cwd
-	}
-
+	//// Handle empty or relative paths like "." or "./" by converting to absolute path
+	//if path == "." || path == "./" {
+	//	// Get current working directory
+	//	cwd, err := os.Getwd()
+	//	if err != nil {
+	//		return &mcp.CallToolResult{
+	//			Content: []mcp.Content{
+	//				mcp.TextContent{
+	//					Type: "text",
+	//					Text: fmt.Sprintf("Error resolving current directory: %v", err),
+	//				},
+	//			},
+	//			IsError: true,
+	//		}, nil
+	//	}
+	//	path = cwd
+	//}
+	path = filepath.Join(fss.config.FSRootPath, path)
 	validPath, err := fss.validatePath(path)
 	if err != nil {
 		return &mcp.CallToolResult{
@@ -624,23 +624,7 @@ func (fss *FilesystemServer) handleWriteFile(
 		return nil, fmt.Errorf("content must be a string")
 	}
 
-	// Handle empty or relative paths like "." or "./" by converting to absolute path
-	if path == "." || path == "./" {
-		// Get current working directory
-		cwd, err := os.Getwd()
-		if err != nil {
-			return &mcp.CallToolResult{
-				Content: []mcp.Content{
-					mcp.TextContent{
-						Type: "text",
-						Text: fmt.Sprintf("Error resolving current directory: %v", err),
-					},
-				},
-				IsError: true,
-			}, nil
-		}
-		path = cwd
-	}
+	path = filepath.Join(fss.config.FSRootPath, path)
 
 	validPath, err := fss.validatePath(path)
 	if err != nil {
@@ -736,23 +720,23 @@ func (fss *FilesystemServer) handleListDirectory(
 		return nil, fmt.Errorf("path must be a string")
 	}
 
-	// Handle empty or relative paths like "." or "./" by converting to absolute path
-	if path == "." || path == "./" {
-		// Get current working directory
-		cwd, err := os.Getwd()
-		if err != nil {
-			return &mcp.CallToolResult{
-				Content: []mcp.Content{
-					mcp.TextContent{
-						Type: "text",
-						Text: fmt.Sprintf("Error resolving current directory: %v", err),
-					},
-				},
-				IsError: true,
-			}, nil
-		}
-		path = cwd
-	}
+	//// Handle empty or relative paths like "." or "./" by converting to absolute path
+	//if path == "." || path == "./" {
+	//	// Get current working directory
+	//	cwd, err := os.Getwd()
+	//	if err != nil {
+	//		return &mcp.CallToolResult{
+	//			Content: []mcp.Content{
+	//				mcp.TextContent{
+	//					Type: "text",
+	//					Text: fmt.Sprintf("Error resolving current directory: %v", err),
+	//				},
+	//			},
+	//			IsError: true,
+	//		}, nil
+	//	}
+	//	path = cwd
+	//}
 
 	validPath, err := fss.validatePath(path)
 	if err != nil {
@@ -855,24 +839,23 @@ func (fss *FilesystemServer) handleCreateDirectory(
 		return nil, fmt.Errorf("path must be a string")
 	}
 
-	// Handle empty or relative paths like "." or "./" by converting to absolute path
-	if path == "." || path == "./" {
-		// Get current working directory
-		cwd, err := os.Getwd()
-		if err != nil {
-			return &mcp.CallToolResult{
-				Content: []mcp.Content{
-					mcp.TextContent{
-						Type: "text",
-						Text: fmt.Sprintf("Error resolving current directory: %v", err),
-					},
-				},
-				IsError: true,
-			}, nil
-		}
-		path = cwd
-	}
-
+	//// Handle empty or relative paths like "." or "./" by converting to absolute path
+	//if path == "." || path == "./" {
+	//	// Get current working directory
+	//	cwd, err := os.Getwd()
+	//	if err != nil {
+	//		return &mcp.CallToolResult{
+	//			Content: []mcp.Content{
+	//				mcp.TextContent{
+	//					Type: "text",
+	//					Text: fmt.Sprintf("Error resolving current directory: %v", err),
+	//				},
+	//			},
+	//			IsError: true,
+	//		}, nil
+	//	}
+	//	path = cwd
+	//}
 	validPath, err := fss.validatePath(path)
 	if err != nil {
 		return &mcp.CallToolResult{
@@ -962,42 +945,41 @@ func (fss *FilesystemServer) handleMoveFile(
 		return nil, fmt.Errorf("destination must be a string")
 	}
 
-	// Handle empty or relative paths for source
-	if source == "." || source == "./" {
-		// Get current working directory
-		cwd, err := os.Getwd()
-		if err != nil {
-			return &mcp.CallToolResult{
-				Content: []mcp.Content{
-					mcp.TextContent{
-						Type: "text",
-						Text: fmt.Sprintf("Error resolving current directory: %v", err),
-					},
-				},
-				IsError: true,
-			}, nil
-		}
-		source = cwd
-	}
-
-	// Handle empty or relative paths for destination
-	if destination == "." || destination == "./" {
-		// Get current working directory
-		cwd, err := os.Getwd()
-		if err != nil {
-			return &mcp.CallToolResult{
-				Content: []mcp.Content{
-					mcp.TextContent{
-						Type: "text",
-						Text: fmt.Sprintf("Error resolving current directory: %v", err),
-					},
-				},
-				IsError: true,
-			}, nil
-		}
-		destination = cwd
-	}
-
+	//// Handle empty or relative paths for source
+	//if source == "." || source == "./" {
+	//	// Get current working directory
+	//	cwd, err := os.Getwd()
+	//	if err != nil {
+	//		return &mcp.CallToolResult{
+	//			Content: []mcp.Content{
+	//				mcp.TextContent{
+	//					Type: "text",
+	//					Text: fmt.Sprintf("Error resolving current directory: %v", err),
+	//				},
+	//			},
+	//			IsError: true,
+	//		}, nil
+	//	}
+	//	source = cwd
+	//}
+	//
+	//// Handle empty or relative paths for destination
+	//if destination == "." || destination == "./" {
+	//	// Get current working directory
+	//	cwd, err := os.Getwd()
+	//	if err != nil {
+	//		return &mcp.CallToolResult{
+	//			Content: []mcp.Content{
+	//				mcp.TextContent{
+	//					Type: "text",
+	//					Text: fmt.Sprintf("Error resolving current directory: %v", err),
+	//				},
+	//			},
+	//			IsError: true,
+	//		}, nil
+	//	}
+	//	destination = cwd
+	//}
 	validSource, err := fss.validatePath(source)
 	if err != nil {
 		return &mcp.CallToolResult{
@@ -1096,24 +1078,23 @@ func (fss *FilesystemServer) handleSearchFiles(ctx context.Context, request mcp.
 		return nil, fmt.Errorf("pattern must be a string")
 	}
 
-	// Handle empty or relative paths like "." or "./" by converting to absolute path
-	if path == "." || path == "./" {
-		// Get current working directory
-		cwd, err := os.Getwd()
-		if err != nil {
-			return &mcp.CallToolResult{
-				Content: []mcp.Content{
-					mcp.TextContent{
-						Type: "text",
-						Text: fmt.Sprintf("Error resolving current directory: %v", err),
-					},
-				},
-				IsError: true,
-			}, nil
-		}
-		path = cwd
-	}
-
+	//// Handle empty or relative paths like "." or "./" by converting to absolute path
+	//if path == "." || path == "./" {
+	//	// Get current working directory
+	//	cwd, err := os.Getwd()
+	//	if err != nil {
+	//		return &mcp.CallToolResult{
+	//			Content: []mcp.Content{
+	//				mcp.TextContent{
+	//					Type: "text",
+	//					Text: fmt.Sprintf("Error resolving current directory: %v", err),
+	//				},
+	//			},
+	//			IsError: true,
+	//		}, nil
+	//	}
+	//	path = cwd
+	//}
 	validPath, err := fss.validatePath(path)
 	if err != nil {
 		return &mcp.CallToolResult{
@@ -1217,22 +1198,22 @@ func (fss *FilesystemServer) handleGetFileInfo(
 	}
 
 	// Handle empty or relative paths like "." or "./" by converting to absolute path
-	if path == "." || path == "./" {
-		// Get current working directory
-		cwd, err := os.Getwd()
-		if err != nil {
-			return &mcp.CallToolResult{
-				Content: []mcp.Content{
-					mcp.TextContent{
-						Type: "text",
-						Text: fmt.Sprintf("Error resolving current directory: %v", err),
-					},
-				},
-				IsError: true,
-			}, nil
-		}
-		path = cwd
-	}
+	//if path == "." || path == "./" {
+	//	// Get current working directory
+	//	cwd, err := os.Getwd()
+	//	if err != nil {
+	//		return &mcp.CallToolResult{
+	//			Content: []mcp.Content{
+	//				mcp.TextContent{
+	//					Type: "text",
+	//					Text: fmt.Sprintf("Error resolving current directory: %v", err),
+	//				},
+	//			},
+	//			IsError: true,
+	//		}, nil
+	//	}
+	//	path = cwd
+	//}
 
 	validPath, err := fss.validatePath(path)
 	if err != nil {
