@@ -14,7 +14,7 @@
 //
 // Repository: https://github.com/gojue/moling
 
-// Package services Description: This file contains the implementation of the CommandServer interface for MacOS and  Linux.
+// Package services Description: This file contains the implementation of the CommandServer interface for macOS and  Linux.
 package services
 
 import (
