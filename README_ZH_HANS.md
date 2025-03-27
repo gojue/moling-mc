@@ -43,9 +43,15 @@ MoLing是一个computer-use的MCP Server，基于操作系统API实现了系统�
 
 
 #### 方法一： 脚本安装
+#### Linux/MacOS
 ```shell
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/gojue/moling/HEAD/install/install.sh)"
 ```
+##### Windows
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://raw.githubusercontent.com/gojue/moling/HEAD/install/install.ps1 | iex"
+```
+
 
 #### 方法二：直接下载
 1. 从[发布页面](https://github.com/gojue/moling/releases)下载安装包

@@ -42,8 +42,13 @@ MoLing is a computer-based MCP Server that implements system interaction through
 ### Installation
 
 #### Option 1: Install via Script
+##### Linux/MacOS
 ```shell
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/gojue/moling/HEAD/install/install.sh)"
+```
+##### Windows
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://raw.githubusercontent.com/gojue/moling/HEAD/install/install.ps1 | iex"
 ```
 
 #### Option 2: Direct Download
