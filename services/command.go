@@ -24,6 +24,7 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/rs/zerolog"
 	"path/filepath"
+	"strings"
 )
 
 var (
@@ -153,6 +154,31 @@ func (cs *CommandServer) handleExecuteCommand(ctx context.Context, request mcp.C
 			},
 		},
 	}, nil
+}
+
+// isAllowedCommand checks if the command is allowed based on the configuration.
+func (cs *CommandServer) isAllowedCommand(command string) bool {
+
+	// 检查命令是否在允许的列表中
+	for _, allowed := range cs.config.AllowedCommands {
+		if strings.HasPrefix(command, allowed) {
+			return true
+		}
+	}
+
+	// 如果命令包含管道符，进一步检查每个子命令
+	if strings.Contains(command, "|") {
+		parts := strings.Split(command, "|")
+		for _, part := range parts {
+			part = strings.TrimSpace(part)
+			if !cs.isAllowedCommand(part) {
+				return false
+			}
+		}
+		return true
+	}
+
+	return false
 }
 
 // Config returns the configuration of the service as a string.
