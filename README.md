@@ -36,7 +36,7 @@ MoLing is a computer-based MCP Server that implements system interaction through
 
 ### Operation Modes
 
-- **Studio Mode**: GUI-based interactive mode for user-friendly experience
+- **Stdio Mode**: CLI-based interactive mode for user-friendly experience
 - **SSR Mode**: Server-Side Rendering mode optimized for headless/automated environments
 
 ### Installation

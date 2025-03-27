@@ -24,7 +24,7 @@ type MoLingServer struct {
 	ctx        context.Context
 	server     *server.MCPServer
 	services   []services.Service
-	listenAddr string // SSE mode listen address, if empty, use STUDIO mode.
+	listenAddr string // SSE mode listen address, if empty, use STDIO mode.
 }
 
 func NewMoLingServer(ctx context.Context, services []services.Service, addr string) (*MoLingServer, error) {
