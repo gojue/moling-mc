@@ -30,9 +30,14 @@ MoLing是一个computer-use的MCP Server，基于操作系统API实现了系统�
 
 ### 支持的MCP客户端
 
-- Claude
-- Cline
-- Cherry Studio
+- [Claude]((https://claude.ai/))
+- [Cline](https://cline.bot/)
+- [Cherry Studio](https://cherry-ai.com/)
+- 其他（支持MCP协议的客户端）
+
+#### 截图
+集成在[Claude](https://claude.ai/)中的MoLing
+![](./images/screenshot_claude.png)
 
 #### 配置格式
 以Claude客户端为例，在配置文件中添加如下配置：
@@ -50,6 +55,9 @@ MoLing是一个computer-use的MCP Server，基于操作系统API实现了系统�
   }
 }
 ```
+
+另外， `/usr/local/bin/moling` 是你存放`MoLing server` 可执行文件的路径，可以自己指定。
+
 ### 运行模式
 
 - **Stdio模式**：本地命令行交互模式，依赖于终端输入输出，适合人机交互
