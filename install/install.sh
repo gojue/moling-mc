@@ -30,8 +30,6 @@ FILE_NAME="moling-${VERSION}-${OS}-${ARCH}"
 
 if [ "$OS" = "darwin" ] || [ "$OS" = "linux" ]; then
   FILE_NAME="${FILE_NAME}.tar.gz"
-elif [ "$OS" = "windows" ]; then
-  FILE_NAME="${FILE_NAME}.zip"
 else
   echo "Unsupported OS: $OS"
   exit 1
@@ -44,11 +42,7 @@ echo "Downloading ${DOWNLOAD_URL}..."
 curl -LO "${DOWNLOAD_URL}"
 
 # Extract the package
-if [ "$OS" = "windows" ]; then
-  unzip "${FILE_NAME}" -d moling
-else
-  tar -xzf "${FILE_NAME}" -C moling
-fi
+tar -xzf "${FILE_NAME}" -C moling
 
 # Move the binary to /usr/local/bin
 sudo mv moling/moling /usr/local/bin/moling
