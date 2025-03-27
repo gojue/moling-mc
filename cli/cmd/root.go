@@ -60,7 +60,7 @@ var (
 	GitVersion = "linux-arm64-202503222008-v0.0.1"
 	mlConfig   = &services.MoLingConfig{
 		Version:  GitVersion,
-		BasePath: "/Users/cfc4n/.moling",
+		BasePath: filepath.Join(os.TempDir(), ".moling"), //"/Users/cfc4n/.moling",
 	}
 	listenAddr string
 )
@@ -76,6 +76,16 @@ var rootCmd = &cobra.Command{
 	// has an action associated with it:
 	RunE: mlsCommandFunc,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		err := services.CheckDirectory(mlConfig.BasePath)
+		if err != nil {
+			return err
+		}
+		for _, dirName := range []string{"logs", "config", "browser"} {
+			err = services.CheckDirectory(filepath.Join(mlConfig.BasePath, dirName))
+			if err != nil {
+				return err
+			}
+		}
 		return nil
 	},
 }

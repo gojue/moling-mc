@@ -17,10 +17,21 @@ package cmd
 import (
 	"context"
 	"github.com/gojue/moling/services"
+	"path/filepath"
 	"testing"
 )
 
 func TestNewMLServer(t *testing.T) {
+	err := services.CheckDirectory(mlConfig.BasePath)
+	if err != nil {
+		t.Errorf("Failed to create base directory: %v", err)
+	}
+	for _, dirName := range []string{"logs", "config", "browser"} {
+		err = services.CheckDirectory(filepath.Join(mlConfig.BasePath, dirName))
+		if err != nil {
+			t.Errorf("Failed to create directory %s: %v", dirName, err)
+		}
+	}
 	loger := initLogger(mlConfig.BasePath)
 	mlConfig.SetLogger(loger)
 
