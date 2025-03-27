@@ -23,20 +23,34 @@ import (
 	"fmt"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/rs/zerolog"
+	"path/filepath"
+)
+
+var (
+	// ErrCommandNotFound is returned when the command is not found.
+	ErrCommandNotFound = fmt.Errorf("command not found")
+	// ErrCommandNotAllowed is returned when the command is not allowed.
+	ErrCommandNotAllowed = fmt.Errorf("command not allowed")
 )
 
 // CommandServer implements the Service interface and provides methods to execute named commands.
 type CommandServer struct {
 	MLService
-	config    *CommandConfig
-	osName    string
-	osVersion string
+	config       *CommandConfig
+	globalConfig *MoLingConfig
+	osName       string
+	osVersion    string
 }
 
 // NewCommandServer creates a new CommandServer with the given allowed commands.
 func NewCommandServer(ctx context.Context, args []string) (Service, error) {
 	var err error
 	cc := NewCommandConfig(args)
+	gConf, ok := ctx.Value(MoLingConfigKey).(*MoLingConfig)
+	if !ok {
+		return nil, fmt.Errorf("CommandServer: invalid config type")
+	}
+
 	lger, ok := ctx.Value(MoLingLoggerKey).(zerolog.Logger)
 	if !ok {
 		return nil, fmt.Errorf("CommandServer: invalid logger type")
@@ -51,7 +65,8 @@ func NewCommandServer(ctx context.Context, args []string) (Service, error) {
 			ctx:    ctx,
 			logger: lger.Hook(loggerNameHook),
 		},
-		config: cc,
+		config:       cc,
+		globalConfig: gConf,
 	}
 
 	err = cs.init()
@@ -103,7 +118,8 @@ func (cs *CommandServer) handleExecuteCommand(ctx context.Context, request mcp.C
 	}
 
 	// Check if the command is allowed
-	if !cs.isCommandAllowed(command) {
+	if !cs.isAllowedCommand(command) {
+		cs.logger.Err(ErrCommandNotAllowed).Str("command", command).Msgf("If you want to allow this command, add it to %s", filepath.Join(cs.globalConfig.BasePath, "config", "config.json"))
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{
 				mcp.TextContent{
@@ -137,21 +153,6 @@ func (cs *CommandServer) handleExecuteCommand(ctx context.Context, request mcp.C
 			},
 		},
 	}, nil
-}
-
-// isCommandAllowed checks if a command is in the list of allowed commands.
-func (cs *CommandServer) isCommandAllowed(command string) bool {
-	//return true
-	if len(cs.config.AllowedCommands) == 0 {
-		return true
-	}
-
-	for _, allowed := range cs.config.AllowedCommands {
-		if command == allowed {
-			return true
-		}
-	}
-	return false
 }
 
 // Config returns the configuration of the service as a string.

@@ -32,7 +32,7 @@ var (
 		"du", "free", "top", "ps", "uptime", "who", "w", "last", "uname", "hostname",
 		"ifconfig", "netstat", "ping", "traceroute", "route", "ip", "ss", "lsof", "vmstat",
 		"iostat", "mpstat", "sar", "uptime", "cut", "sort", "uniq", "wc", "awk", "sed",
-		"diff", "cmp", "comm", "file", "basename", "dirname", "chmod", "chown",
+		"diff", "cmp", "comm", "file", "basename", "dirname", "chmod", "chown", "curl",
 	}
 )
 

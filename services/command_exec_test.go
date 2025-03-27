@@ -31,7 +31,11 @@ type MockCommandServer struct {
 
 // TestExecuteCommand tests the executeCommand function.
 func TestExecuteCommand(t *testing.T) {
-	cs := &MockCommandServer{}
+	cs := &MockCommandServer{
+		CommandServer{
+			config: NewCommandConfig([]string{}),
+		},
+	}
 	execCmd := "echo 'Hello, World!'"
 	// Test a simple command
 	output, err := cs.executeCommand(execCmd)
@@ -46,6 +50,13 @@ func TestExecuteCommand(t *testing.T) {
 	// Test a command with a timeout
 	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*10)
 	defer cancel()
+
+	execCmd = "curl ifconfig.me|grep Time"
+	output, err = cs.executeCommand(execCmd)
+	if err != nil {
+		t.Fatalf("Expected no error, got %v", err)
+	}
+	t.Logf("Command output: %s", output)
 	cmd := exec.CommandContext(ctx, "sleep", "1")
 	err = cmd.Run()
 	if err == nil {

@@ -22,6 +22,7 @@ import (
 	"context"
 	"errors"
 	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -31,25 +32,6 @@ func (cs *CommandServer) executeCommand(command string) (string, error) {
 	ctx, cfunc := context.WithTimeout(context.Background(), time.Second*3)
 	defer cfunc()
 	cmd = exec.CommandContext(ctx, "sh", "-c", command)
-
-	/*
-		stdoutPipe, err := cmd.StdoutPipe()
-		if err != nil {
-			return "", err
-		}
-		if err := cmd.Start(); err != nil {
-			return "", err
-		}
-
-		// 读取标准输出
-		output, err := io.ReadAll(stdoutPipe)
-		if err != nil {
-			return "", err
-		}
-
-		// 等待命令完成
-		err = cmd.Wait()
-	*/
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		switch {
@@ -65,4 +47,29 @@ func (cs *CommandServer) executeCommand(command string) (string, error) {
 	}
 
 	return string(output), nil
+}
+
+// isAllowedCommand checks if the command is allowed based on the configuration.
+func (cs *CommandServer) isAllowedCommand(command string) bool {
+
+	// 检查命令是否在允许的列表中
+	for _, allowed := range cs.config.AllowedCommands {
+		if strings.HasPrefix(command, allowed) {
+			return true
+		}
+	}
+
+	// 如果命令包含管道符，进一步检查每个子命令
+	if strings.Contains(command, "|") {
+		parts := strings.Split(command, "|")
+		for _, part := range parts {
+			part = strings.TrimSpace(part)
+			if !cs.isAllowedCommand(part) {
+				return false
+			}
+		}
+		return true
+	}
+
+	return false
 }
