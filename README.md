@@ -10,12 +10,12 @@ English | [中文](./README_ZH_HANS.md)
 ---
 
 ### Introduction
-MoLing is a computer-based MCP Server that implements system interaction through operating system APIs, enabling file system operations such as reading, writing, merging, statistics, and aggregation, as well as the ability to execute system commands. It is a dependency-free local office automation assistant.
+MoLing is a computer-use and browser-use MCP Server that implements system interaction through operating system APIs, enabling file system operations such as reading, writing, merging, statistics, and aggregation, as well as the ability to execute system commands. It is a dependency-free local office automation assistant.
 
 ### Advantages
 > [!IMPORTANT]
 > Requiring no installation of any dependencies, MoLing can be run directly and is compatible with multiple operating systems, including Windows, Linux, and macOS. 
-> This eliminates the hassle of dealing with environment conflicts involving Node.js, Python, and other development environments.
+> This eliminates the hassle of dealing with environment conflicts involving Node.js, Python, Docker and other development environments.
 
 ### Features
 
@@ -43,7 +43,10 @@ MoLing in [Claude](https://claude.ai/)
 For example, to configure the Claude client, add the following configuration:
 
 > [!TIP]
+> 
 > Only 3-6 lines of configuration are needed.
+> 
+> Claude config path: `~/Library/Application\ Support/Claude/claude_desktop_config`
 
 ```json
 {
