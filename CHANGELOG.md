@@ -1,3 +1,10 @@
+# v0.0.3 (2025-03-28)
+
+## What's Changed
+
+**Full Changelog**: https://github.com/gojue/moling/compare/v0.0.2...v0.0.3
+<hr>
+
 # v0.0.2 (2025-03-27)
 
 ## What's Changed
