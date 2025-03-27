@@ -30,7 +30,7 @@ MoLing是一个computer-use和browser-use的MCP Server，基于操作系统API�
 
 ### 支持的MCP客户端
 
-- [Claude]((https://claude.ai/))
+- [Claude](https://claude.ai/)
 - [Cline](https://cline.bot/)
 - [Cherry Studio](https://cherry-ai.com/)
 - 其他（支持MCP协议的客户端）

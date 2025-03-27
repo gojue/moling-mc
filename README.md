@@ -30,7 +30,7 @@ MoLing is a computer-use and browser-use MCP Server that implements system inter
 
 ### Supported MCP Clients
 
-- [Claude]((https://claude.ai/))
+- [Claude](https://claude.ai/)
 - [Cline](https://cline.bot/)
 - [Cherry Studio](https://cherry-ai.com/)
 - etc. (who support MCP protocol)
