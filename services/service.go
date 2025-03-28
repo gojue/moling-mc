@@ -49,6 +49,8 @@ type Service interface {
 	// Config returns the configuration of the service as a string.
 	Config() string
 
+	MlConfig() *MoLingConfig
+
 	// Name returns the name of the service.
 	Name() string
 
@@ -80,6 +82,7 @@ type MLService struct {
 	tools                []server.ServerTool
 	notificationHandlers map[string]server.NotificationHandlerFunc
 	logger               zerolog.Logger // The logger for the service
+	mlConfig             *MoLingConfig  // The configuration for the service
 }
 
 // init initializes the MLService with empty maps and a mutex.
@@ -168,11 +171,28 @@ func (mls *MLService) NotificationHandlers() map[string]server.NotificationHandl
 	return mls.notificationHandlers
 }
 
-//// Config returns the configuration of the service as a string.
-//func (mls *MLService) Config() string {
-//	panic("not implemented yet") // TODO: Implement
-//}
-//
-//func (mls *MLService) Name() string {
-//	panic("not implemented yet") // TODO: Implement
-//}
+// CallToolResult return a CallToolResult with the given message and error status.
+func (mls *MLService) CallToolResult(isError bool, msg string) *mcp.CallToolResult {
+	return &mcp.CallToolResult{
+		Content: []mcp.Content{
+			mcp.TextContent{
+				Type: "text",
+				Text: msg,
+			},
+		},
+		IsError: isError,
+	}
+}
+
+func (mls *MLService) MlConfig() *MoLingConfig {
+	return mls.mlConfig
+}
+
+// Config returns the configuration of the service as a string.
+func (mls *MLService) Config() string {
+	panic("not implemented yet") // TODO: Implement
+}
+
+func (mls *MLService) Name() string {
+	panic("not implemented yet") // TODO: Implement
+}
