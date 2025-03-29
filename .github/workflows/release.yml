@@ -15,7 +15,7 @@ jobs:
         os: [ darwin, windows, linux ]
         arch: [ amd64, arm64 ]
     runs-on: ubuntu-22.04
-    name: test on ${{ matrix.os }} ${{ matrix.arch }}
+    name: Release on ${{ matrix.os }} ${{ matrix.arch }}
     steps:
       - uses: actions/setup-go@v5
         with:
@@ -24,26 +24,6 @@ jobs:
         with:
           submodules: 'recursive'
           fetch-depth: 0
-      - name: Generate Release Notes
-        id: release_notes
-        run: |
-          gh api \
-            --method POST \
-            -H "Accept: application/vnd.github+json" \
-            /repos/${{ github.repository }}/releases/generate-notes \
-            -f tag_name=${{ github.ref_name }} \
-            -f previous_tag_name=${{ steps.previoustag.outputs.PREVIOUS_TAG }} \
-            > release_notes.json
-          echo "NOTES<<EOF" >> $GITHUB_OUTPUT
-          jq -r .body release_notes.json >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-      - name: Write File
-        uses: DamianReeves/write-file-action@v1.2
-        with:
-          path: ./bin/release_notes.txt
-          contents: |
-            ${{ steps.release_notes.outputs.NOTES }}
-          write-mode: append
       - name: MoLing Build
         run: |
           make clean
@@ -66,6 +46,6 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
             tag_name: ${{ github.ref_name }}
-            release_name: ${{ github.ref_name }}
+            generate_release_notes: true
             files: |
                 ./dist/moling-${{ github.ref_name }}-${{ matrix.os }}-${{ matrix.arch }}.*
