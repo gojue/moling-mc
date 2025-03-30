@@ -9,6 +9,8 @@ English | [中文](./README_ZH_HANS.md)
 
 ---
 
+![](./images/logo.jpg)
+
 ### Introduction
 MoLing is a computer-use and browser-use MCP Server that implements system interaction through operating system APIs, enabling file system operations such as reading, writing, merging, statistics, and aggregation, as well as the ability to execute system commands. It is a dependency-free local office automation assistant.
 

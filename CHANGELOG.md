@@ -1,6 +1,17 @@
-# v0.0.5 (2025-03-29)
+# v0.0.6 (2025-03-30)
 
 ## What's Changed
+
+**Full Changelog**: https://github.com/gojue/moling/compare/v0.0.5...v0.0.6
+<hr>
+
+# v0.0.5 (2025-03-29)
+## What's Changed
+
+* fix #4 invalid data path by @cfc4n in https://github.com/gojue/moling/pull/5
+* feat: add automated release notes generation in release workflow by @cfc4n in https://github.com/gojue/moling/pull/6
+* Improve logging & error handling, rename configs, simplify service logic by @cfc4n
+  in https://github.com/gojue/moling/pull/8
 
 **Full Changelog**: https://github.com/gojue/moling/compare/v0.0.3...v0.0.5
 <hr>
