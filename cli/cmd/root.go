@@ -46,10 +46,11 @@ MoLing is a computer-based MCP Server that implements system interaction through
 Requiring no installation of any dependencies, MoLing can be run directly and is compatible with multiple operating systems, including Windows, Linux, and macOS. This eliminates the hassle of dealing with environment conflicts involving Node.js, Python, and other development environments.
 
 Usage:
-  moling config
-  moling -l 127.0.0.1:8080
-  moling client --install
+  moling
+  moling -l 127.0.0.1:6789
   moling -h
+  moling client -i
+  moling config 
 `
 	CliDescriptionLongZh = `MoLing（魔灵） 是一个computer-use的MCP Server，基于操作系统API实现了系统交互，可以实现文件系统的读写、合并、统计、聚合等操作，也可以执行系统命令操作。是一个无需任何依赖的本地办公自动化助手。
 没有任何安装依赖，直接运行，兼容Windows、Linux、macOS等操作系统。再也不用苦恼NodeJS、Python等环境冲突等问题。

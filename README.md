@@ -79,6 +79,7 @@ For example, to configure the Claude client, add the following configuration:
 and, `/usr/local/bin/moling` is the path to the MoLing server binary you downloaded.
 
 **Automatic Configuration**
+
 run `moling client --install` to automatically install the configuration for the MCP client.
 
 MoLing will automatically detect the MCP client and install the configuration for you. including: Cline, Claude, Roo

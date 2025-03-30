@@ -76,6 +76,7 @@ MoLing是一个computer-use和browser-use的MCP Server，基于操作系统API�
 另外， `/usr/local/bin/moling` 是你存放`MoLing` Server可执行文件的路径，可以自己指定。
 
 **自动配置**
+
 运行 `moling client --install` 命令将会自动为本机的所有MCP客户端安装MoLing。包括Cline、 Claude、 Roo Code等等。
 
 ### 运行模式

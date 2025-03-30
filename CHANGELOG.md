@@ -1,6 +1,16 @@
+# v0.0.7 (2025-03-31)
+## What's Changed
+
+**Full Changelog**: https://github.com/gojue/moling/compare/v0.0.6...v0.0.7
+<hr>
+
 # v0.0.6 (2025-03-30)
 
 ## What's Changed
+
+* feat: enhance service initialization and configuration loading by @cfc4n in https://github.com/gojue/moling/pull/9
+* feat: update installation script and README for improved user experie… by @cfc4n
+  in https://github.com/gojue/moling/pull/10
 
 **Full Changelog**: https://github.com/gojue/moling/compare/v0.0.5...v0.0.6
 <hr>
