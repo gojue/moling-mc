@@ -22,12 +22,12 @@ import (
 )
 
 func TestNewMLServer(t *testing.T) {
-	err := CreateDirectory(mlConfig.BasePath)
+	err := services.CreateDirectory(mlConfig.BasePath)
 	if err != nil {
 		t.Errorf("Failed to create base directory: %v", err)
 	}
 	for _, dirName := range mlDirectories {
-		err = CreateDirectory(filepath.Join(mlConfig.BasePath, dirName))
+		err = services.CreateDirectory(filepath.Join(mlConfig.BasePath, dirName))
 		if err != nil {
 			t.Errorf("Failed to create directory %s: %v", dirName, err)
 		}
@@ -38,9 +38,13 @@ func TestNewMLServer(t *testing.T) {
 	ctx := context.WithValue(context.Background(), services.MoLingConfigKey, mlConfig)
 	ctx = context.WithValue(ctx, services.MoLingLoggerKey, loger)
 	// Create a new server with the filesystem service
-	fs, err := services.NewFilesystemServer(ctx, []string{"/tmp/"})
+	fs, err := services.NewFilesystemServer(ctx)
 	if err != nil {
 		t.Errorf("Failed to create filesystem server: %v", err)
+	}
+	err = fs.Init()
+	if err != nil {
+		t.Errorf("Failed to initialize filesystem server: %v", err)
 	}
 	srvs := []services.Service{
 		fs,
