@@ -1,23 +1,28 @@
-// Copyright 2025 CFC4N <cfc4n.cs@gmail.com>. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//   http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/*
+ *
+ *  Copyright 2025 CFC4N <cfc4n.cs@gmail.com>. All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ *  Repository: https://github.com/gojue/moling
+ *
+ */
 
-package cmd
+package services
 
 import (
 	"context"
 	"fmt"
-	"github.com/gojue/moling/services"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/rs/zerolog"
 	"log"
@@ -29,15 +34,16 @@ import (
 type MoLingServer struct {
 	ctx        context.Context
 	server     *server.MCPServer
-	services   []services.Service
+	services   []Service
 	logger     zerolog.Logger
+	mlConfig   MoLingConfig
 	listenAddr string // SSE mode listen address, if empty, use STDIO mode.
 }
 
-func NewMoLingServer(ctx context.Context, srvs []services.Service) (*MoLingServer, error) {
+func NewMoLingServer(ctx context.Context, srvs []Service, mlConfig MoLingConfig) (*MoLingServer, error) {
 	mcpServer := server.NewMCPServer(
-		MCPServerName,
-		GitVersion,
+		mlConfig.ServerName,
+		mlConfig.Version,
 		server.WithResourceCapabilities(true, true),
 		server.WithLogging(),
 		server.WithPromptCapabilities(true),
@@ -48,7 +54,8 @@ func NewMoLingServer(ctx context.Context, srvs []services.Service) (*MoLingServe
 		server:     mcpServer,
 		services:   srvs,
 		listenAddr: mlConfig.ListenAddr,
-		logger:     ctx.Value(services.MoLingLoggerKey).(zerolog.Logger),
+		logger:     ctx.Value(MoLingLoggerKey).(zerolog.Logger),
+		mlConfig:   mlConfig,
 	}
 	err := ms.init()
 	return ms, err
@@ -66,7 +73,7 @@ func (m *MoLingServer) init() error {
 	return err
 }
 
-func (m *MoLingServer) loadService(srv services.Service) error {
+func (m *MoLingServer) loadService(srv Service) error {
 
 	// Add resources
 	for r, rhf := range srv.Resources() {
@@ -95,7 +102,7 @@ func (m *MoLingServer) loadService(srv services.Service) error {
 }
 
 func (s *MoLingServer) Serve() error {
-	mLogger := log.New(s.logger, MCPServerName, 0)
+	mLogger := log.New(s.logger, s.mlConfig.ServerName, 0)
 	if s.listenAddr != "" {
 		ltnAddr := fmt.Sprintf("http://%s", strings.TrimPrefix(s.listenAddr, "http://"))
 		consoleWriter := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}

@@ -57,7 +57,7 @@ Usage:
 
 Usage:
   moling
-  moling -l 127.0.0.1:6789
+  moling -l 127.0.0.1:29118
   moling -h
   moling client -i
   moling config 
@@ -70,7 +70,7 @@ const (
 )
 
 var (
-	GitVersion = "linux-arm64-202503222008-v0.0.1"
+	GitVersion = "unknown_arm64_v0.0.0_2025-03-22 20:08"
 	mlConfig   = &services.MoLingConfig{
 		Version:    GitVersion,
 		ConfigFile: filepath.Join("config", MLConfigName),
@@ -140,7 +140,8 @@ func initLogger(mlDataPath string) zerolog.Logger {
 	var logger zerolog.Logger
 	var err error
 	logFile := filepath.Join(mlDataPath, "logs", "moling.log")
-	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	//zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	if mlConfig.Debug {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
@@ -198,7 +199,7 @@ func mlsCommandFunc(command *cobra.Command, args []string) error {
 	}
 	loger.Info().Str("ServerName", MCPServerName).Str("version", GitVersion).Msg("start")
 	// MCPServer
-	srv, err := NewMoLingServer(ctxNew, srvs)
+	srv, err := services.NewMoLingServer(ctxNew, srvs, *mlConfig)
 	if err != nil {
 		loger.Error().Err(err).Msg("failed to create server")
 		cancelFunc()

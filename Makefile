@@ -2,7 +2,7 @@ include variables.mk
 include functions.mk
 
 .PHONY: all | env
-all: clean test format build
+all: clean build
 	@echo $(shell date)
 
 .ONESHELL:

@@ -27,7 +27,6 @@ import (
 // initTestEnv initializes the test environment by creating a temporary log file and setting up the logger.
 func initTestEnv() (zerolog.Logger, context.Context, error) {
 	logFile := filepath.Join(os.TempDir(), "moling.log")
-	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	var logger zerolog.Logger
 	f, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600)

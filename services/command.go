@@ -79,11 +79,10 @@ func NewCommandServer(ctx context.Context) (Service, error) {
 
 func (cs *CommandServer) Init() error {
 	var err error
-
 	pe := PromptEntry{
 		prompt: mcp.Prompt{
 			Name:        "command_prompt",
-			Description: fmt.Sprintf("You are a command-line tool assistant, using macOS 15.3.3 system commands to help users troubleshoot network issues, system performance, file searching, and statistics, among other things."),
+			Description: fmt.Sprintf("You are a command-line tool assistant, using %s system commands to help users troubleshoot network issues, system performance, file searching, and statistics, among other things.", cs.MlConfig().SystemInfo),
 			//Arguments:   make([]mcp.PromptArgument, 0),
 		},
 		phf: cs.handlePrompt,
@@ -108,7 +107,7 @@ func (cs *CommandServer) handlePrompt(ctx context.Context, request mcp.GetPrompt
 				Role: mcp.RoleUser,
 				Content: mcp.TextContent{
 					Type: "text",
-					Text: fmt.Sprintf("You are a command-line tool assistant, using %s system commands to help users troubleshoot network issues, system performance, among other things.", cs.MlConfig().SystemInfo),
+					Text: fmt.Sprintf(""),
 				},
 			},
 		},
@@ -149,6 +148,17 @@ func (cs *CommandServer) isAllowedCommand(command string) bool {
 	// 如果命令包含管道符，进一步检查每个子命令
 	if strings.Contains(command, "|") {
 		parts := strings.Split(command, "|")
+		for _, part := range parts {
+			part = strings.TrimSpace(part)
+			if !cs.isAllowedCommand(part) {
+				return false
+			}
+		}
+		return true
+	}
+
+	if strings.Contains(command, "&") {
+		parts := strings.Split(command, "&")
 		for _, part := range parts {
 			part = strings.TrimSpace(part)
 			if !cs.isAllowedCommand(part) {

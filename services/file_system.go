@@ -204,6 +204,20 @@ func (fss *FilesystemServer) isPathInAllowedDirs(path string) bool {
 
 func (fss *FilesystemServer) validatePath(requestedPath string) (string, error) {
 	// Always convert to absolute path first
+	var hasPrefix bool
+	var firstDir string
+	for _, dir := range fss.config.allowedDirs {
+		if firstDir == "" {
+			firstDir = dir
+		}
+		if strings.HasPrefix(requestedPath, dir) {
+			hasPrefix = true
+			break
+		}
+	}
+	if !hasPrefix {
+		requestedPath = filepath.Join(firstDir, requestedPath)
+	}
 	abs, err := filepath.Abs(requestedPath)
 	if err != nil {
 		return "", fmt.Errorf("invalid path: %w", err)
@@ -414,6 +428,7 @@ func (fss *FilesystemServer) handleReadFile(ctx context.Context, request mcp.Cal
 		return fss.CallToolResultErr("Path must be a string"), nil
 	}
 
+	// 判断 前缀是不是已经包含了
 	path = filepath.Join(fss.config.CachePath, path)
 	validPath, err := fss.validatePath(path)
 	if err != nil {
@@ -636,7 +651,7 @@ func (fss *FilesystemServer) handleListDirectory(ctx context.Context, request mc
 
 	validPath, err := fss.validatePath(path)
 	if err != nil {
-		return fss.CallToolResultErr(fmt.Sprintf("validate path error: %v", err)), nil
+		return fss.CallToolResultErr(fmt.Sprintf("validate path error: %v, path:%s", err, validPath)), nil
 	}
 
 	// Check if it'fss a directory
@@ -948,7 +963,7 @@ func (fss *FilesystemServer) handleListAllowedDirectories(ctx context.Context, r
 	}
 
 	var result strings.Builder
-	result.WriteString("Allowed directories:\n\n")
+	result.WriteString("Allowed directories:")
 
 	for _, dir := range displayDirs {
 		resourceURI := pathToResourceURI(dir)

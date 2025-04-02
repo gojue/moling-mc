@@ -18,6 +18,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/rs/zerolog"
@@ -30,6 +31,10 @@ type contextKey string
 const (
 	MoLingConfigKey contextKey = "moling_config"
 	MoLingLoggerKey contextKey = "moling_logger"
+)
+
+var (
+	ErrConfigNotLoaded = errors.New("config not loaded, please call LoadConfig() first")
 )
 
 // Service defines the interface for a service with various handlers and tools.

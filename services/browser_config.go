@@ -29,7 +29,7 @@ type BrowserConfig struct {
 	Proxy           string `json:"proxy"`
 	UserAgent       string `json:"user_agent"`
 	DefaultLanguage string `json:"default_language"`
-	URLTimeout      int    `json:"url_timeout"`
+	URLTimeout      int    `json:"url_timeout"` // URLTimeout is the timeout for loading a URL. time.Second
 	CSSTimeout      int    `json:"css_timeout"`
 	DataPath        string `json:"data_path"`         // DataPath is the path to the data directory.
 	BrowserDataPath string `json:"browser_data_path"` // BrowserDataPath is the path to the browser data directory.
@@ -56,7 +56,7 @@ func NewBrowserConfig() *BrowserConfig {
 		Timeout:         30,
 		URLTimeout:      10,
 		CSSTimeout:      10,
-		UserAgent:       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+		UserAgent:       "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
 		DefaultLanguage: "en-US",
 		DataPath:        filepath.Join(os.TempDir(), ".moling", "data"),
 	}

@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"os/exec"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -60,4 +61,58 @@ func TestExecuteCommand(t *testing.T) {
 	if !errors.Is(ctx.Err(), context.DeadlineExceeded) {
 		t.Errorf("Expected context deadline exceeded error, got %v", ctx.Err())
 	}
+}
+
+func TestAllowCmd(t *testing.T) {
+	// Test with a command that is allowed
+	_, ctx, err := initTestEnv()
+	if err != nil {
+		t.Fatalf("Failed to initialize test environment: %v", err)
+	}
+
+	cs, err := NewCommandServer(ctx)
+	if err != nil {
+		t.Fatalf("Failed to create CommandServer: %v", err)
+	}
+
+	cc := StructToMap(NewCommandConfig())
+	t.Logf("CommandConfig: %v", cc)
+	err = cs.LoadConfig(cc)
+	if err != nil {
+		t.Fatalf("Failed to load config: %v", err)
+	}
+	cmd := "cd /var/logs/notfound && git log --since=\"today\" --pretty=format:\"%h - %an, %ar : %s\""
+	cs1 := cs.(*CommandServer)
+	if !cs1.isAllowedCommand(cmd) {
+		t.Errorf("Command '%s' is not allowed", cmd)
+	}
+	t.Log("Command is allowed:", cmd)
+}
+
+// 将 struct 转换为 map
+func StructToMap(obj interface{}) map[string]interface{} {
+	result := make(map[string]interface{})
+	val := reflect.ValueOf(obj)
+	if val.Kind() == reflect.Ptr {
+		val = val.Elem()
+	}
+	if val.Kind() != reflect.Struct {
+		return nil
+	}
+	typ := val.Type()
+	for i := 0; i < val.NumField(); i++ {
+		field := typ.Field(i)
+		value := val.Field(i)
+		// 跳过未导出的字段
+		if field.PkgPath != "" {
+			continue
+		}
+		// 获取字段的 json tag（如果存在）
+		key := field.Name
+		if tag := field.Tag.Get("json"); tag != "" {
+			key = tag
+		}
+		result[key] = value.Interface()
+	}
+	return result
 }

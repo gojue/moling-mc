@@ -18,6 +18,7 @@ package services
 
 import (
 	"fmt"
+	"strings"
 )
 
 // CommandConfig represents the configuration for allowed commands.
@@ -34,7 +35,7 @@ var (
 		"iostat", "mpstat", "sar", "uptime", "cut", "sort", "uniq", "wc", "awk", "sed",
 		"diff", "cmp", "comm", "file", "basename", "dirname", "chmod", "chown", "curl",
 		"nslookup", "dig", "host", "ssh", "scp", "sftp", "ftp", "wget", "tar", "gzip",
-		"scutil", "networksetup",
+		"scutil", "networksetup, git", "cd",
 	}
 )
 
@@ -42,6 +43,7 @@ var (
 func NewCommandConfig() *CommandConfig {
 	return &CommandConfig{
 		allowedCommands: allowedCmdDefault,
+		AllowedCommand:  strings.Join(allowedCmdDefault, ","),
 	}
 }
 

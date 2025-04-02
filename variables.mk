@@ -33,17 +33,17 @@ GO_VERSION_MIN = $(shell $(CMD_ECHO) $(GO_VERSION) | $(CMD_CUT) -d'.' -f2)
 
 # tags date info
 VERSION_NUM ?= v0.0.1
-NOW_DATE := $(shell date +%Y%m%d%H%M%S)
+NOW_DATE := $(shell date +"%Y-%m-%d %H:%M:%S")
 TAG_COMMIT := $(shell git rev-list --abbrev-commit --tags --max-count=1)
 TAG := $(shell git describe --abbrev=0 --tags ${TAG_COMMIT} 2>/dev/null || true)
 COMMIT := $(shell git rev-parse --short HEAD)
-DATE := $(shell git log -1 --format=%cd --date=format:"%Y%m%d")
-LAST_GIT_TAG := $(TAG)-$(DATE)-$(COMMIT)
+DATE := $(shell git log -1 --format=%cd --date=format:"%Y %m %d")
+LAST_GIT_TAG := $(COMMIT)_$(NOW_DATE)
 
 ifndef SNAPSHOT_VERSION
-	VERSION_NUM = $(NOW_DATE)-$(COMMIT)
+	VERSION_NUM = $(LAST_GIT_TAG)
 else
-	VERSION_NUM = $(NOW_DATE)-$(SNAPSHOT_VERSION)
+	VERSION_NUM = $(SNAPSHOT_VERSION)_$(NOW_DATE)
 endif
 
 #

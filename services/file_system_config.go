@@ -29,7 +29,7 @@ var (
 
 // FileSystemConfig represents the configuration for the file system.
 type FileSystemConfig struct {
-	AllowedDir  string `json:"allowed_dirs"` // AllowedDirs is a list of allowed directories. split by comma. e.g. /tmp,/var/tmp
+	AllowedDir  string `json:"allowed_dir"` // AllowedDirs is a list of allowed directories. split by comma. e.g. /tmp,/var/tmp
 	allowedDirs []string
 	CachePath   string `json:"cache_path"` // CachePath is the root path for the file system.
 }

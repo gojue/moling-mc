@@ -58,5 +58,5 @@ moling config --init
 echo "MoLing configuration initialized successfully!"
 
 echo "setup MCP Server configuration into MCP Client"
-moling client -i -d
+moling client -i
 echo "MCP Client configuration setup successfully!"
