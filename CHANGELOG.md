@@ -1,5 +1,17 @@
-# v0.0.7 (2025-03-31)
+# v0.0.8 (2025-04-04)
 ## What's Changed
+
+**Full Changelog**: https://github.com/gojue/moling/compare/v0.0.7...v0.0.8
+<hr>
+
+# v0.0.7 (2025-03-31)
+
+## What's Changed
+
+* feat: add logging enhancements and listen address flag for SSE mode by @cfc4n
+  in https://github.com/gojue/moling/pull/11
+* feat: add client command for automated MCP Server configuration management by @cfc4n
+  in https://github.com/gojue/moling/pull/12
 
 **Full Changelog**: https://github.com/gojue/moling/compare/v0.0.6...v0.0.7
 <hr>
