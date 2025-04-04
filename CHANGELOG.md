@@ -1,5 +1,22 @@
-# v0.0.8 (2025-04-04)
+# v0.1.0 (2025-04-04)
 ## What's Changed
+
+**Full Changelog**: https://github.com/gojue/moling/compare/v0.0.8...v0.1.0
+<hr>
+
+# v0.0.8 (2025-04-04)
+
+## What's Changed
+
+* docs: add Japanese README file by @eltociear in https://github.com/gojue/moling/pull/13
+* feat: implement log file rotation and enhance logging configuration by @cfc4n
+  in https://github.com/gojue/moling/pull/14
+* chore: update dependencies for chromedp and mcp-go to latest versions by @cfc4n
+  in https://github.com/gojue/moling/pull/15
+
+## New Contributors
+
+* @eltociear made their first contribution in https://github.com/gojue/moling/pull/13
 
 **Full Changelog**: https://github.com/gojue/moling/compare/v0.0.7...v0.0.8
 <hr>

@@ -225,7 +225,6 @@ func mlsCommandFunc(command *cobra.Command, args []string) error {
 	// 等待信号
 	_ = <-sigChan
 	loger.Info().Msg("Received signal, shutting down...")
-	// 创建一个超时上下文，用于优雅关闭
 	// close all services
 	for srvName, closer := range closers {
 		err = closer()

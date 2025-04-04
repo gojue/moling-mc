@@ -29,7 +29,7 @@ func initTestEnv() (zerolog.Logger, context.Context, error) {
 	logFile := filepath.Join(os.TempDir(), "moling.log")
 	zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	var logger zerolog.Logger
-	f, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600)
+	f, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o600)
 	if err != nil {
 		return zerolog.Logger{}, nil, err
 	}

@@ -96,7 +96,7 @@ func (fs *FilesystemServer) Init() error {
 	fs.AddTool(mcp.NewTool("read_file",
 		mcp.WithDescription("Read the complete contents of a file from the file system."),
 		mcp.WithString("path",
-			mcp.Description("Path to the file to read"),
+			mcp.Description("Relative path to the file to read"),
 			mcp.Required(),
 		),
 	), fs.handleReadFile)
@@ -105,7 +105,7 @@ func (fs *FilesystemServer) Init() error {
 		"write_file",
 		mcp.WithDescription("Create a new file or overwrite an existing file with new content."),
 		mcp.WithString("path",
-			mcp.Description("Path where to write the file"),
+			mcp.Description("Relative Path where to write the file"),
 			mcp.Required(),
 		),
 		mcp.WithString("content",
@@ -118,7 +118,7 @@ func (fs *FilesystemServer) Init() error {
 		"list_directory",
 		mcp.WithDescription("Get a detailed listing of all files and directories in a specified path."),
 		mcp.WithString("path",
-			mcp.Description("Path of the directory to list"),
+			mcp.Description("Relative Path of the directory to list"),
 			mcp.Required(),
 		),
 	), fs.handleListDirectory)
@@ -127,7 +127,7 @@ func (fs *FilesystemServer) Init() error {
 		"create_directory",
 		mcp.WithDescription("Create a new directory or ensure a directory exists."),
 		mcp.WithString("path",
-			mcp.Description("Path of the directory to create"),
+			mcp.Description("Relative Path of the directory to create"),
 			mcp.Required(),
 		),
 	), fs.handleCreateDirectory)
@@ -136,11 +136,11 @@ func (fs *FilesystemServer) Init() error {
 		"move_file",
 		mcp.WithDescription("Move or rename files and directories."),
 		mcp.WithString("source",
-			mcp.Description("Source path of the file or directory"),
+			mcp.Description("Relative Source path of the file or directory"),
 			mcp.Required(),
 		),
 		mcp.WithString("destination",
-			mcp.Description("Destination path"),
+			mcp.Description("Relative Destination path"),
 			mcp.Required(),
 		),
 	), fs.handleMoveFile)
@@ -149,11 +149,11 @@ func (fs *FilesystemServer) Init() error {
 		"search_files",
 		mcp.WithDescription("Recursively search for files and directories matching a pattern."),
 		mcp.WithString("path",
-			mcp.Description("Starting path for the search"),
+			mcp.Description("Relative Starting path for the search"),
 			mcp.Required(),
 		),
 		mcp.WithString("pattern",
-			mcp.Description("Search pattern to match against file names"),
+			mcp.Description("Relative Search pattern to match against file names"),
 			mcp.Required(),
 		),
 	), fs.handleSearchFiles)
@@ -162,7 +162,7 @@ func (fs *FilesystemServer) Init() error {
 		"get_file_info",
 		mcp.WithDescription("Retrieve detailed metadata about a file or directory."),
 		mcp.WithString("path",
-			mcp.Description("Path to the file or directory"),
+			mcp.Description("Relative Path to the file or directory"),
 			mcp.Required(),
 		),
 	), fs.handleGetFileInfo)
@@ -429,7 +429,7 @@ func (fss *FilesystemServer) handleReadFile(ctx context.Context, request mcp.Cal
 	}
 
 	// 判断 前缀是不是已经包含了
-	path = filepath.Join(fss.config.CachePath, path)
+	//path = filepath.Join(fss.config.CachePath, path)
 	validPath, err := fss.validatePath(path)
 	if err != nil {
 		return fss.CallToolResultErr(fmt.Sprintf("validate Path Error: %v", err)), nil
@@ -587,7 +587,7 @@ func (fss *FilesystemServer) handleWriteFile(ctx context.Context, request mcp.Ca
 		return fss.CallToolResultErr("Content must be a string"), nil
 	}
 
-	path = filepath.Join(fss.config.CachePath, path)
+	//path = filepath.Join(fss.config.CachePath, path)
 
 	validPath, err := fss.validatePath(path)
 	if err != nil {

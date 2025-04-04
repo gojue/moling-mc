@@ -87,7 +87,6 @@ func (bs *BrowserServer) Init() error {
 		return fmt.Errorf("failed to create data directory: %v", err)
 	}
 
-	// chromedp.Evaluate(`Object.defineProperty(navigator, 'webdriver', {get: () => false})`, nil),
 	// Create a new context for the browser
 	opts := append(
 		chromedp.DefaultExecAllocatorOptions[:],
@@ -104,7 +103,7 @@ func (bs *BrowserServer) Init() error {
 		chromedp.Flag("disable-extensions", true),
 		chromedp.Flag("CommandLineFlagSecurityWarningsEnabled", false),
 		chromedp.CombinedOutput(bs.logger),
-		chromedp.WindowSize(1700, 1050),
+		chromedp.WindowSize(1280, 800),
 		chromedp.UserDataDir(bs.config.BrowserDataPath),
 		chromedp.IgnoreCertErrors,
 	)
@@ -118,7 +117,7 @@ func (bs *BrowserServer) Init() error {
 	pe := PromptEntry{
 		prompt: mcp.Prompt{
 			Name:        "browser_prompt",
-			Description: fmt.Sprintf("相关操作，必需使用标准的CSS选择器"),
+			Description: fmt.Sprintf("Get the relevant functions and prompts of the current MCP Server."),
 			//Arguments:   make([]mcp.PromptArgument, 0),
 		},
 		phf: bs.handlePrompt,
@@ -238,7 +237,7 @@ func (bs *BrowserServer) handlePrompt(ctx context.Context, request mcp.GetPrompt
 				Role: mcp.RoleUser,
 				Content: mcp.TextContent{
 					Type: "text",
-					Text: fmt.Sprintf(""),
+					Text: fmt.Sprintf("You are an intelligent MCP Server that performs browser tasks, capable of web browsing, button clicking, form filling, and other tasks."),
 				},
 			},
 		},
@@ -251,6 +250,7 @@ func (bs *BrowserServer) handleNavigate(ctx context.Context, request mcp.CallToo
 	if !ok {
 		return nil, fmt.Errorf("url must be a string")
 	}
+
 	err := chromedp.Run(bs.ctx, chromedp.Navigate(url))
 	if err != nil {
 		return bs.CallToolResultErr(fmt.Sprintf("failed to navigate: %v", err)), nil
@@ -268,15 +268,17 @@ func (bs *BrowserServer) handleScreenshot(ctx context.Context, request mcp.CallT
 	width, _ := request.Params.Arguments["width"].(int)
 	height, _ := request.Params.Arguments["height"].(int)
 	if width == 0 {
-		width = 1700
+		width = 1280
 	}
 	if height == 0 {
-		height = 1050
+		height = 800
 	}
 	var buf []byte
 	var err error
+	runCtx, cancelFunc := context.WithTimeout(bs.ctx, time.Duration(bs.config.SelectorQueryTimeout)*time.Second)
+	defer cancelFunc()
 	if selector == "" {
-		err = chromedp.Run(bs.ctx, chromedp.FullScreenshot(&buf, 90))
+		err = chromedp.Run(runCtx, chromedp.FullScreenshot(&buf, 90))
 	} else {
 		err = chromedp.Run(bs.ctx, chromedp.Screenshot(selector, &buf, chromedp.NodeVisible))
 	}
@@ -284,7 +286,6 @@ func (bs *BrowserServer) handleScreenshot(ctx context.Context, request mcp.CallT
 		return bs.CallToolResultErr(fmt.Sprintf("failed to take screenshot: %v", err)), nil
 	}
 
-	//
 	newName := filepath.Join(bs.config.DataPath, fmt.Sprintf("%s_%d.png", strings.TrimRight(name, ".png"), rand.Int()))
 	err = os.WriteFile(newName, buf, 0644)
 	if err != nil {
@@ -299,9 +300,9 @@ func (bs *BrowserServer) handleClick(ctx context.Context, request mcp.CallToolRe
 	if !ok {
 		return bs.CallToolResultErr(fmt.Sprintf("selector must be a string:%v", selector)), nil
 	}
-	execCtx, cancelFunc := context.WithTimeout(bs.ctx, time.Duration(bs.config.SelectorQueryTimeout)*time.Second)
+	runCtx, cancelFunc := context.WithTimeout(bs.ctx, time.Duration(bs.config.SelectorQueryTimeout)*time.Second)
 	defer cancelFunc()
-	err := chromedp.Run(execCtx,
+	err := chromedp.Run(runCtx,
 		chromedp.WaitReady("body", chromedp.ByQuery), // 等待页面就绪
 		chromedp.WaitVisible(selector, chromedp.ByQuery),
 		chromedp.Click(selector, chromedp.NodeVisible),
@@ -323,9 +324,10 @@ func (bs *BrowserServer) handleFill(ctx context.Context, request mcp.CallToolReq
 	if !ok {
 		return bs.CallToolResultErr(fmt.Sprintf("failed to fill input field: %v, selector:%v", request.Params.Arguments["value"], selector)), nil
 	}
-	execCtx, cancelFunc := context.WithTimeout(bs.ctx, time.Duration(bs.config.SelectorQueryTimeout)*time.Second)
+
+	runCtx, cancelFunc := context.WithTimeout(bs.ctx, time.Duration(bs.config.SelectorQueryTimeout)*time.Second)
 	defer cancelFunc()
-	err := chromedp.Run(execCtx, chromedp.SendKeys(selector, value, chromedp.NodeVisible))
+	err := chromedp.Run(runCtx, chromedp.SendKeys(selector, value, chromedp.NodeVisible))
 	if err != nil {
 		return bs.CallToolResultErr(fmt.Sprintf("failed to fill input field: %v", err)), nil
 	}
@@ -341,7 +343,9 @@ func (bs *BrowserServer) handleSelect(ctx context.Context, request mcp.CallToolR
 	if !ok {
 		return bs.CallToolResultErr(fmt.Sprintf("failed to select value:%v", request.Params.Arguments["value"])), nil
 	}
-	err := chromedp.Run(bs.ctx, chromedp.SetValue(selector, value, chromedp.NodeVisible))
+	runCtx, cancelFunc := context.WithTimeout(bs.ctx, time.Duration(bs.config.SelectorQueryTimeout)*time.Second)
+	defer cancelFunc()
+	err := chromedp.Run(runCtx, chromedp.SetValue(selector, value, chromedp.NodeVisible))
 	if err != nil {
 		return bs.CallToolResultErr(fmt.Errorf("failed to select value: %v", err).Error()), nil
 	}
@@ -355,7 +359,9 @@ func (bs *BrowserServer) handleHover(ctx context.Context, request mcp.CallToolRe
 		return bs.CallToolResultErr(fmt.Sprintf("selector must be a string:%v", selector)), nil
 	}
 	var res bool
-	err := chromedp.Run(bs.ctx, chromedp.Evaluate(`document.querySelector('`+selector+`').dispatchEvent(new Event('mouseover'))`, &res))
+	runCtx, cancelFunc := context.WithTimeout(bs.ctx, time.Duration(bs.config.SelectorQueryTimeout)*time.Second)
+	defer cancelFunc()
+	err := chromedp.Run(runCtx, chromedp.Evaluate(`document.querySelector('`+selector+`').dispatchEvent(new Event('mouseover'))`, &res))
 	if err != nil {
 		return bs.CallToolResultErr(fmt.Errorf("failed to hover over element: %v", err).Error()), nil
 	}
@@ -368,7 +374,9 @@ func (bs *BrowserServer) handleEvaluate(ctx context.Context, request mcp.CallToo
 		return bs.CallToolResultErr("script must be a string"), nil
 	}
 	var result interface{}
-	err := chromedp.Run(bs.ctx, chromedp.Evaluate(script, &result))
+	runCtx, cancelFunc := context.WithTimeout(bs.ctx, time.Duration(bs.config.SelectorQueryTimeout)*time.Second)
+	defer cancelFunc()
+	err := chromedp.Run(runCtx, chromedp.Evaluate(script, &result))
 	if err != nil {
 		return bs.CallToolResultErr(fmt.Errorf("failed to execute script: %v", err).Error()), nil
 	}
@@ -377,8 +385,6 @@ func (bs *BrowserServer) handleEvaluate(ctx context.Context, request mcp.CallToo
 
 func (bs *BrowserServer) Close() error {
 	bs.logger.Debug().Msg("Closing browser server")
-	//tctx, tcancel := context.WithTimeout(context.Background(), 3*time.Second)
-	//defer tcancel()
 	bs.cancelAlloc()
 	bs.cancelChrome()
 	// Cancel the context to stop the browser

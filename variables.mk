@@ -32,7 +32,7 @@ GO_VERSION_MAJ = $(shell $(CMD_ECHO) $(GO_VERSION) | $(CMD_CUT) -d'.' -f1)
 GO_VERSION_MIN = $(shell $(CMD_ECHO) $(GO_VERSION) | $(CMD_CUT) -d'.' -f2)
 
 # tags date info
-VERSION_NUM ?= v0.0.1
+VERSION_NUM ?= v0.0.0
 NOW_DATE := $(shell date +"%Y-%m-%d %H:%M:%S")
 TAG_COMMIT := $(shell git rev-list --abbrev-commit --tags --max-count=1)
 TAG := $(shell git describe --abbrev=0 --tags ${TAG_COMMIT} 2>/dev/null || true)
