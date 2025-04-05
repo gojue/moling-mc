@@ -9,7 +9,7 @@
 
 ---
 
-![](./images/logo.jpg)
+![](./images/logo.svg)
 
 ### 简介
 MoLing是一个computer-use和browser-use的MCP Server，基于操作系统API实现了系统交互，浏览器模拟控制，可以实现文件系统的读写、合并、统计、聚合等操作，也可以执行系统命令操作。是一个无需任何依赖的本地办公自动化助手。
