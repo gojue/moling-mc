@@ -27,6 +27,8 @@ MoLing is a computer-use and browser-use MCP Server that implements system inter
 - **File System Operations**: Reading, writing, merging, statistics, and aggregation
 - **Command-line Terminal**: Execute system commands directly
 - **Browser Control**: Powered by `github.com/chromedp/chromedp`
+    - Chrome browser is required.
+    - In Windows, the full path to Chrome needs to be configured in the system environment variables.
 - **Future Plans**:
     - Personal PC data organization
     - Document writing assistance

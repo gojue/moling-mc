@@ -1,5 +1,14 @@
-# v0.1.0 (2025-04-04)
+# v0.1.1 (2025-04-08)
 ## What's Changed
+
+**Full Changelog**: https://github.com/gojue/moling/compare/v0.1.0...v0.1.1
+<hr>
+
+# v0.1.0 (2025-04-04)
+
+## What's Changed
+
+* Improve builder by @cfc4n in https://github.com/gojue/moling/pull/16
 
 **Full Changelog**: https://github.com/gojue/moling/compare/v0.0.8...v0.1.0
 <hr>

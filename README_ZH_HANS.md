@@ -27,6 +27,8 @@ MoLing是一个computer-use和browser-use的MCP Server，基于操作系统API�
 - **文件系统操作**：读取、写入、合并、统计和聚合
 - **命令行终端**：直接执行系统命令
 - **浏览器控制**：基于 `github.com/chromedp/chromedp`
+  - 需要安装Chrome浏览器
+  - Windows系统中，需要在环境变量中配置Chrome的完整路径
 - **未来计划**：
     - 个人电脑资料整理
     - 文档编写辅助
