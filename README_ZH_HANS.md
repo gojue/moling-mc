@@ -43,9 +43,11 @@ MoLing是一个computer-use和browser-use的MCP Server，基于操作系统API�
 - [Cherry Studio](https://cherry-ai.com/)
 - 其他（支持MCP协议的客户端）
 
-#### 截图
+#### 演示
 集成在[Claude](https://claude.ai/)中的MoLing
 ![](./images/screenshot_claude.png)
+
+![](https://github.com/user-attachments/assets/229c4dd5-23b4-4b53-9e25-3eba8734b5b7)
 
 #### 配置格式
 

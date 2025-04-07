@@ -47,6 +47,8 @@ MoLingは、オペレーティングシステムAPIを介してシステム操�
 [Claude](https://claude.ai/)に統合されたMoLing
 ![](./images/screenshot_claude.png)
 
+![](https://github.com/user-attachments/assets/229c4dd5-23b4-4b53-9e25-3eba8734b5b7)
+
 #### 設定形式
 
 ##### MCPサーバー（MoLing）設定
