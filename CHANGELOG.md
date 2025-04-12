@@ -1,5 +1,22 @@
+# v0.2.0 (2025-04-13)
+
+## What's Changed
+
+* feat: add support for advanced logging configuration by @cfc4n in [#25](https://github.com/gojue/moling/pull/25)
+* fix: resolve issue with incorrect breakpoint handling by @cfc4n in [#26](https://github.com/gojue/moling/pull/26)
+* docs: update README with debugging examples by @cfc4n in [#27](https://github.com/gojue/moling/pull/27)
+
+**Full Changelog**: https://github.com/gojue/moling/compare/v0.1.1...v0.2.0
+<hr>
+
 # v0.1.1 (2025-04-08)
 ## What's Changed
+
+* feat: update CLI descriptions for clarity and accuracy by @cfc4n in https://github.com/gojue/moling/pull/17
+* refactor: change log levels from Info to Debug and Warn for improved … by @cfc4n
+  in https://github.com/gojue/moling/pull/19
+* fix: update README files to replace image links with direct URLs by @cfc4n in https://github.com/gojue/moling/pull/20
+* feat: add MCP Client configuration to install script by @cfc4n in https://github.com/gojue/moling/pull/22
 
 **Full Changelog**: https://github.com/gojue/moling/compare/v0.1.0...v0.1.1
 <hr>
