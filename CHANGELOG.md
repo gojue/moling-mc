@@ -1,3 +1,16 @@
+# v0.3.0 (2025-04-18)
+
+## What's Changed
+
+* feat: add client configuration paths for Trae and update README by @cfc4n
+  in [#27](https://github.com/gojue/moling/pull/27)
+* feat: support Cursor IDE (MCP Client) by @cfc4n in [#28](https://github.com/gojue/moling/pull/28)
+* feat: Improves code consistency, adds PID management, and enhances user prompts by @cfc4n
+  in [#29](https://github.com/gojue/moling/pull/29)
+
+**Full Changelog**: https://github.com/gojue/moling/compare/v0.2.0...v0.3.0
+<hr>
+
 # v0.2.0 (2025-04-13)
 
 ## What's Changed
