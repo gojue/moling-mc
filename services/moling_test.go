@@ -21,11 +21,32 @@
 package services
 
 import (
+	"context"
 	"github.com/gojue/moling/utils"
+	"github.com/rs/zerolog"
 	"os"
 	"path/filepath"
 	"testing"
 )
+
+// initTestEnv initializes the test environment by creating a temporary log file and setting up the logger.
+func initTestEnv() (zerolog.Logger, context.Context, error) {
+	logFile := filepath.Join(os.TempDir(), "moling.log")
+	zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	var logger zerolog.Logger
+	f, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o600)
+	if err != nil {
+		return zerolog.Logger{}, nil, err
+	}
+	logger = zerolog.New(f).With().Timestamp().Logger()
+	mlConfig := &MoLingConfig{
+		ConfigFile: filepath.Join("config", "test_config.json"),
+		BasePath:   os.TempDir(),
+	}
+	ctx := context.WithValue(context.Background(), MoLingConfigKey, mlConfig)
+	ctx = context.WithValue(ctx, MoLingLoggerKey, logger)
+	return logger, ctx, nil
+}
 
 func TestNewMLServer(t *testing.T) {
 	// Create a new MoLingConfig
@@ -57,7 +78,7 @@ func TestNewMLServer(t *testing.T) {
 	mlConfig.SetLogger(logger)
 
 	// Create a new server with the filesystem service
-	fs, err := NewFilesystemServer(ctx)
+	fs, err := NewMinecraftServer(ctx)
 	if err != nil {
 		t.Errorf("Failed to create filesystem server: %v", err)
 	}
