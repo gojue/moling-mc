@@ -33,7 +33,7 @@ jobs:
           make clean
           TARGET_OS=${{ matrix.os }} TARGET_ARCH=${{ matrix.arch }} make env
           TARGET_OS=${{ matrix.os }} TARGET_ARCH=${{ matrix.arch }} make test
-      - name: MoLing Build
+      - name: MoLing MineCraft Build
         run: |
           make clean
           TARGET_OS=${{ matrix.os }} TARGET_ARCH=${{ matrix.arch }} make env

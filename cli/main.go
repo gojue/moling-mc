@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// Repository: https://github.com/gojue/moling
+// Repository: https://github.com/gojue/moling-minecraft
 
 package cli
 
 import (
-	"github.com/gojue/moling/cli/cmd"
+	"github.com/gojue/moling-minecraft/cli/cmd"
 )
 
 func Start() {

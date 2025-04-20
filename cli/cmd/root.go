@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// Repository: https://github.com/gojue/moling
+// Repository: https://github.com/gojue/moling-minecraft
 
 package cmd
 
@@ -20,9 +20,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/gojue/moling/cli/cobrautl"
-	"github.com/gojue/moling/services"
-	"github.com/gojue/moling/utils"
+	"github.com/gojue/moling-minecraft/cli/cobrautl"
+	"github.com/gojue/moling-minecraft/services"
+	"github.com/gojue/moling-minecraft/utils"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 	"os"
@@ -36,43 +36,38 @@ import (
 )
 
 const (
-	CliName            = "moling"
+	CliName            = "moling_mc"
 	CliNameZh          = "魔灵"
-	MCPServerName      = "MoLing MCP Server"
-	CliDescription     = "MoLing is a computer-use and browser-use based MCP server. It is a locally deployed, dependency-free office AI assistant."
-	CliDescriptionZh   = "MoLing（魔灵）是一款基于computer-use和浏browser-use的 MCP 服务器，它是一个本地部署、无依赖的办公 AI 助手。"
-	CliHomepage        = "https://gojue.cc/moling"
+	MCPServerName      = "MoLing MineCraft AI Assistant"
+	CliDescription     = "MoLing MineCraft is AI assistant."
+	CliHomepage        = "https://gojue.cc/moling-minecraft"
 	CliAuthor          = "CFC4N <cfc4ncs@gmail.com>"
-	CliGithubRepo      = "https://github.com/gojue/moling"
+	CliGithubRepo      = "https://github.com/gojue/moling-minecraft"
 	CliDescriptionLong = `
-MoLing is a computer-based MCP Server that implements system interaction through operating system APIs, enabling file system operations such as reading, writing, merging, statistics, and aggregation, as well as the ability to execute system commands. It is a dependency-free local office automation assistant.
-
-Requiring no installation of any dependencies, MoLing can be run directly and is compatible with multiple operating systems, including Windows, Linux, and macOS. This eliminates the hassle of dealing with environment conflicts involving Node.js, Python, and other development environments.
-
+MoLing MineCraft is an AI assistant for automatic management of Minecraft based on MCP, capable of automatically constructing buildings, managing servers, and generating maps.
 Usage:
-  moling
-  moling -l 127.0.0.1:6789
-  moling -h
-  moling client -i
-  moling config 
+  moling_mc
+  moling_mc -l 127.0.0.1:6789
+  moling_mc -h
+  moling_mc client -i
+  moling_mc config 
 `
-	CliDescriptionLongZh = `MoLing（魔灵）是一个computer-use的MCP Server，基于操作系统API实现了系统交互，可以实现文件系统的读写、合并、统计、聚合等操作，也可以执行系统命令操作。是一个无需任何依赖的本地办公自动化助手。
-没有任何安装依赖，直接运行，兼容Windows、Linux、macOS等操作系统。再也不用苦恼NodeJS、Python等环境冲突等问题。
+	CliDescriptionLongZh = `MoLing MineCraft 是一个基于MCP实现的智能自动管理MineCraft的助手，可以实现自动搭建建筑、自动管理服务器、自动生成地图等功能。
 
 Usage:
-  moling
-  moling -l 127.0.0.1:29118
-  moling -h
-  moling client -i
-  moling config 
+  moling_mc
+  moling_mc -l 127.0.0.1:29118
+  moling_mc -h
+  moling_mc client -i
+  moling_mc config 
 `
 )
 
 const (
 	MLConfigName = "config.json"     // config file name of MoLing Server
-	MLRootPath   = ".moling"         // config file name of MoLing Server
-	MLPidName    = "moling.pid"      // pid file name
-	LogFileName  = "moling.log"      //	log file name
+	MLRootPath   = ".moling_mc"      // config file name of MoLing Server
+	MLPidName    = "moling_mc.pid"   // pid file name
+	LogFileName  = "moling_mc.log"   //	log file name
 	MaxLogSize   = 1024 * 1024 * 512 // 512MB
 )
 

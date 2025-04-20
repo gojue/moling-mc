@@ -14,7 +14,7 @@
 
 package main
 
-import "github.com/gojue/moling/cli"
+import "github.com/gojue/moling-minecraft/cli"
 
 func main() {
 	cli.Start()

@@ -2,10 +2,10 @@
 
 [English](./README.md) | 中文 | [日本語](./README_JA_JP.md)
 
-[![GitHub stars](https://img.shields.io/github/stars/gojue/moling.svg?label=Stars&logo=github)](https://github.com/gojue/moling/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/gojue/moling?label=Forks&logo=github)](https://github.com/gojue/moling/forks)
-[![CI](https://github.com/gojue/moling/actions/workflows/go-test.yml/badge.svg)](https://github.com/gojue/moling/actions/workflows/go-test.yml)
-[![Github Version](https://img.shields.io/github/v/release/gojue/moling?display_name=tag&include_prereleases&sort=semver)](https://github.com/gojue/moling/releases)
+[![GitHub stars](https://img.shields.io/github/stars/gojue/moling.svg?label=Stars&logo=github)](https://github.com/gojue/moling-minecraft/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/gojue/moling?label=Forks&logo=github)](https://github.com/gojue/moling-minecraft/forks)
+[![CI](https://github.com/gojue/moling-minecraft/actions/workflows/go-test.yml/badge.svg)](https://github.com/gojue/moling-minecraft/actions/workflows/go-test.yml)
+[![Github Version](https://img.shields.io/github/v/release/gojue/moling?display_name=tag&include_prereleases&sort=semver)](https://github.com/gojue/moling-minecraft/releases)
 
 ---
 
@@ -70,8 +70,8 @@ https://github.com/user-attachments/assets/229c4dd5-23b4-4b53-9e25-3eba8734b5b7
 ```json
 {
   "mcpServers": {
-    "MoLing": {
-      "command": "/usr/local/bin/moling",
+    "MoLing MineCraft": {
+      "command": "/usr/local/bin/moling_mc",
       "args": []
     }
   }
@@ -95,7 +95,7 @@ https://github.com/user-attachments/assets/229c4dd5-23b4-4b53-9e25-3eba8734b5b7
 #### 方法一： 脚本安装
 #### Linux/MacOS
 ```shell
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/gojue/moling/HEAD/install/install.sh)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/gojue/moling-minecraft/HEAD/install/install.sh)"
 ```
 
 ##### Windows
@@ -104,23 +104,23 @@ https://github.com/user-attachments/assets/229c4dd5-23b4-4b53-9e25-3eba8734b5b7
 > 未测试，不确定是否正常。
 
 ```powershell
-powershell -ExecutionPolicy ByPass -c "irm https://raw.githubusercontent.com/gojue/moling/HEAD/install/install.ps1 | iex"
+powershell -ExecutionPolicy ByPass -c "irm https://raw.githubusercontent.com/gojue/moling-minecraft/HEAD/install/install.ps1 | iex"
 ```
 
 
 #### 方法二：直接下载
-1. 从[发布页面](https://github.com/gojue/moling/releases)下载安装包
+1. 从[发布页面](https://github.com/gojue/moling-minecraft/releases)下载安装包
 2. 解压安装包
 3. 运行服务器：
 ```sh
-./moling
+./moling_mc
 ```
 
 #### 方法三：从源码编译
 1. 克隆代码库：
 ```sh
-git clone https://github.com/gojue/moling.git
-cd moling
+git clone https://github.com/gojue/moling-minecraft.git
+cd moling_minecraft
 ```
 2. 编译项目（需要Golang工具链）：
 ```sh
@@ -128,7 +128,7 @@ make build
 ```
 3. 运行编译后的程序：
 ```sh
-./bin/moling
+./bin/moling_mc
 ```
 
 ### 使用说明

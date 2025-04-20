@@ -1,4 +1,4 @@
-name: MoLing Release
+name: MoLing MineCraft Release
 on:
   push:
     tags:
@@ -24,7 +24,7 @@ jobs:
         with:
           submodules: 'recursive'
           fetch-depth: 0
-      - name: MoLing Build
+      - name: MoLing MineCraft Build
         run: |
           make clean
           SNAPSHOT_VERSION=${{ github.ref_name }} TARGET_OS=${{ matrix.os }} TARGET_ARCH=${{ matrix.arch }} make env

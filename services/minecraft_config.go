@@ -18,20 +18,11 @@
 
 package services
 
-import "fmt"
+import (
+	"fmt"
+	"path/filepath"
+)
 
-/*
-// MinecraftConfig represents the configuration for the Minecraft service.
-type MinecraftConfig struct {
-	ServerAddress  string `json:"server_address"`
-	Port           int    `json:"port"`
-	Username       string `json:"username"`
-	Password       string `json:"password"`
-	GameVersion    string `json:"game_version"`
-	CommandTimeout int    `json:"command_timeout"`
-	Logfile        string `json:"logfile"` // Log file path
-}
-*/
 // MinecraftConfig represents the configuration for the Minecraft service.
 type MinecraftConfig struct {
 	// --- Fields for connecting to an EXISTING server (e.g., via RCON - currently NOT used by StartMinecraftServer) ---
@@ -57,10 +48,10 @@ type MinecraftConfig struct {
 func NewMinecraftConfig() *MinecraftConfig {
 	// Sensible defaults, assuming user wants to start a local server
 	// User MUST configure ServerRootPath and ServerJarFile in their config file
-	return &MinecraftConfig{
+	mc := &MinecraftConfig{
 		ServerAddress:   "localhost",                   // Default, but not used for local start
 		Port:            25565,                         // Default, but not used for local start
-		Username:        "MoLing",                      // Default, but not used for local start
+		Username:        "MoLingMC",                    // Default, but not used for local start
 		Password:        "",                            // Default, but not used for local start
 		ServerRootPath:  "./minecraft_server/",         // MUST BE SET BY USER CONFIG
 		ServerJarFile:   "minecraft_server.1.20.2.jar", // MUST BE SET BY USER CONFIG
@@ -70,8 +61,10 @@ func NewMinecraftConfig() *MinecraftConfig {
 		StartupTimeout:  5,               // 60 seconds default startup wait
 		ShutdownCommand: "stop",
 		GameVersion:     "1.20.2", // Default, should reflect jar version ideally
-		CommandTimeout:  10,
+		CommandTimeout:  3,
 	}
+
+	return mc
 }
 
 // Check validates the configuration.
@@ -96,5 +89,9 @@ func (mc *MinecraftConfig) Check() error {
 	// if mc.Port <= 0 {
 	// 	return fmt.Errorf("port must be greater than 0")
 	// }
+
+	// Set the absolute path for the server log file
+	mc.ServerLogFile = filepath.Join(mc.ServerRootPath, filepath.Base(mc.ServerLogFile))
+
 	return nil
 }

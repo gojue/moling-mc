@@ -14,7 +14,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- *  Repository: https://github.com/gojue/moling
+ *  Repository: https://github.com/gojue/moling-minecraft
  *
  */
 
@@ -22,7 +22,7 @@ package services
 
 import (
 	"context"
-	"github.com/gojue/moling/utils"
+	"github.com/gojue/moling-minecraft/utils"
 	"github.com/rs/zerolog"
 	"os"
 	"path/filepath"
@@ -31,7 +31,7 @@ import (
 
 // initTestEnv initializes the test environment by creating a temporary log file and setting up the logger.
 func initTestEnv() (zerolog.Logger, context.Context, error) {
-	logFile := filepath.Join(os.TempDir(), "moling.log")
+	logFile := filepath.Join(os.TempDir(), "moling_mc.log")
 	zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	var logger zerolog.Logger
 	f, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o600)

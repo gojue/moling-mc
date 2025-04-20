@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// Repository: https://github.com/gojue/moling
+// Repository: https://github.com/gojue/moling-minecraft
 
 package cmd
 
 import (
-	"github.com/gojue/moling/utils"
+	"github.com/gojue/moling-minecraft/utils"
 	"github.com/spf13/cobra"
 	"path/filepath"
 )

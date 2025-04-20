@@ -2,10 +2,10 @@
 
 English | [中文](./README_ZH_HANS.md) | [日本語](./README_JA_JP.md)
 
-[![GitHub stars](https://img.shields.io/github/stars/gojue/moling.svg?label=Stars&logo=github)](https://github.com/gojue/moling/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/gojue/moling?label=Forks&logo=github)](https://github.com/gojue/moling/forks)
-[![CI](https://github.com/gojue/moling/actions/workflows/go-test.yml/badge.svg)](https://github.com/gojue/moling/actions/workflows/go-test.yml)
-[![Github Version](https://img.shields.io/github/v/release/gojue/moling?display_name=tag&include_prereleases&sort=semver)](https://github.com/gojue/moling/releases)
+[![GitHub stars](https://img.shields.io/github/stars/gojue/moling.svg?label=Stars&logo=github)](https://github.com/gojue/moling-minecraft/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/gojue/moling?label=Forks&logo=github)](https://github.com/gojue/moling-minecraft/forks)
+[![CI](https://github.com/gojue/moling-minecraft/actions/workflows/go-test.yml/badge.svg)](https://github.com/gojue/moling-minecraft/actions/workflows/go-test.yml)
+[![Github Version](https://img.shields.io/github/v/release/gojue/moling?display_name=tag&include_prereleases&sort=semver)](https://github.com/gojue/moling-minecraft/releases)
 
 ---
 
@@ -73,8 +73,8 @@ For example, to configure the Claude client, add the following configuration:
 ```json
 {
   "mcpServers": {
-    "MoLing": {
-      "command": "/usr/local/bin/moling",
+    "MoLing MineCraft": {
+      "command": "/usr/local/bin/moling_mc",
       "args": []
     }
   }
@@ -100,7 +100,7 @@ Code, etc.
 #### Option 1: Install via Script
 ##### Linux/MacOS
 ```shell
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/gojue/moling/HEAD/install/install.sh)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/gojue/moling-minecraft/HEAD/install/install.sh)"
 ```
 ##### Windows
 
@@ -108,22 +108,22 @@ Code, etc.
 > Not tested, unsure if it works.
 
 ```powershell
-powershell -ExecutionPolicy ByPass -c "irm https://raw.githubusercontent.com/gojue/moling/HEAD/install/install.ps1 | iex"
+powershell -ExecutionPolicy ByPass -c "irm https://raw.githubusercontent.com/gojue/moling-minecraft/HEAD/install/install.ps1 | iex"
 ```
 
 #### Option 2: Direct Download
-1. Download the installation package from [releases page](https://github.com/gojue/moling/releases)
+1. Download the installation package from [releases page](https://github.com/gojue/moling-minecraft/releases)
 2. Extract the package
 3. Run the server:
    ```sh
-   ./moling
+   ./moling_mc
    ```
 
 #### Option 3: Build from Source
 1. Clone the repository:
 ```sh
-git clone https://github.com/gojue/moling.git
-cd moling
+git clone https://github.com/gojue/moling-minecraft.git
+cd moling_minecraft
 ```
 2. Build the project (requires Golang toolchain):
 ```sh
@@ -131,7 +131,7 @@ make build
 ```
 3. Run the compiled binary:
 ```sh
-./bin/moling
+./bin/moling_mc
 ```
 
 ### Usage

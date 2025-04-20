@@ -14,7 +14,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- *  Repository: https://github.com/gojue/moling
+ *  Repository: https://github.com/gojue/moling-minecraft
  *
  */
 
@@ -28,7 +28,7 @@ import (
 
 func TestClientManager_ListClient(t *testing.T) {
 	logger := zerolog.New(os.Stdout)
-	mcpConfig := NewMCPServerConfig("MoLing UnitTest Description", "moling_test", "MoLing MCP Server")
+	mcpConfig := NewMCPServerConfig("MoLing MineCraft UnitTest Description", "moling_test", "MoLing MCP Server")
 	cm := NewManager(logger, mcpConfig)
 	// Mock client list
 	clientLists["TestClient"] = "/path/to/nonexistent/file"
@@ -37,64 +37,9 @@ func TestClientManager_ListClient(t *testing.T) {
 	// Check logs or other side effects as needed
 }
 
-/*
-	func TestClientManager_SetupConfig(t *testing.T) {
-		logger := zerolog.New(os.Stdout)
-		mcpConfig := NewMCPServerConfig("MoLing UnitTest Description", "moling_test", "MoLing MCP Server")
-		cm := NewManager(logger, mcpConfig)
-
-		// Mock client list
-		clientLists["TestClient"] = "/path/to/nonexistent/file"
-
-		cm.SetupConfig()
-		// Check logs or other side effects as needed
-	}
-
-	func TestClientManager_appendConfig(t *testing.T) {
-		logger := zerolog.New(os.Stdout)
-		mcpConfig := NewMCPServerConfig("MoLing UnitTest Description", "moling_test", "MoLing MCP Server")
-		cm := NewManager(logger, mcpConfig)
-
-		// Mock payload
-		payload := []byte(`{
-	  "Cline": {
-	    "description": "MoLing UnitTest Description",
-	    "isActive": true,
-	    "command": "moling_test"
-	  },
-	  "mcpServers": {
-	    "testABC": {
-	      "args": [
-	        "--allow-dir",
-	        "/tmp/,/Users/username/Downloads"
-	      ],
-	      "command": "npx",
-	      "timeout": 300
-	    }
-	  }
-	}`)
-
-	result, err := cm.appendConfig("TestClient", payload)
-	if err != nil {
-		t.Fatalf("Expected no error, got %v", err)
-	}
-
-	var resultMap map[string]interface{}
-	err = json.Unmarshal(result, &resultMap)
-	if err != nil {
-		t.Fatalf("Expected valid JSON, got error %v", err)
-	}
-
-	if resultMap["existingKey"] != "existingValue" {
-		t.Errorf("Expected existingKey to be existingValue, got %v", resultMap["existingKey"])
-	}
-
-}
-*/
-
 func TestClientManager_checkExist(t *testing.T) {
 	logger := zerolog.New(os.Stdout)
-	mcpConfig := NewMCPServerConfig("MoLing UnitTest Description", "moling_test", "MoLing MCP Server")
+	mcpConfig := NewMCPServerConfig("MoLing MineCraft UnitTest Description", "moling_test", "MoLing MCP Server")
 	cm := NewManager(logger, mcpConfig)
 
 	// Test with a non-existent file

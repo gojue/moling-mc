@@ -57,4 +57,4 @@ OS_ARCH ?= $(shell uname -m)
 OS_VERSION_SHORT := $(shell uname -r | cut -d'-' -f 1)
 TARGET_OS ?= $(OS_NAME)
 TARGET_ARCH ?= $(if $(filter x86_64,$(OS_ARCH)),amd64,arm64)
-OUT_BIN := bin/moling
+OUT_BIN := bin/moling_mc
