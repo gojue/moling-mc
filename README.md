@@ -1,141 +1,136 @@
 ## MoLing MCP Server
 
-English | [中文](./README_ZH_HANS.md) | [日本語](./README_JA_JP.md)
+English | [汉字](./README_ZH_HANS.md)
 
-[![GitHub stars](https://img.shields.io/github/stars/gojue/moling.svg?label=Stars&logo=github)](https://github.com/gojue/moling-minecraft/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/gojue/moling?label=Forks&logo=github)](https://github.com/gojue/moling-minecraft/forks)
+[![GitHub stars](https://img.shields.io/github/stars/gojue/moling-minecraft.svg?label=Stars&logo=github)](https://github.com/gojue/moling-minecraft/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/gojue/moling-minecraft?label=Forks&logo=github)](https://github.com/gojue/moling-minecraft/forks)
 [![CI](https://github.com/gojue/moling-minecraft/actions/workflows/go-test.yml/badge.svg)](https://github.com/gojue/moling-minecraft/actions/workflows/go-test.yml)
-[![Github Version](https://img.shields.io/github/v/release/gojue/moling?display_name=tag&include_prereleases&sort=semver)](https://github.com/gojue/moling-minecraft/releases)
+[![Github Version](https://img.shields.io/github/v/release/gojue/moling-minecraft?display_name=tag&include_prereleases&sort=semver)](https://github.com/gojue/moling-minecraft/releases)
 
 ---
 
 ![](./images/logo.svg)
 
 ### Introduction
-MoLing is a computer-use and browser-use MCP Server that implements system interaction through operating system APIs, enabling file system operations such as reading, writing, merging, statistics, and aggregation, as well as the ability to execute system commands. It is a dependency-free local office automation assistant.
-
-### Advantages
-> [!IMPORTANT]
-> Requiring no installation of any dependencies, MoLing can be run directly and is compatible with multiple operating systems, including Windows, Linux, and macOS. 
-> This eliminates the hassle of dealing with environment conflicts involving Node.js, Python, Docker and other development environments.
+MoLing MineCraft is an AI agent MCP server for the Minecraft game, featuring intelligent building, architecture, and game control capabilities. Through natural language interaction, it helps players realize complex constructions, redstone circuit designs, and other creative ideas, enhancing the gaming experience.
 
 ### Features
 
 > [!CAUTION]
-> Command-line operations are dangerous and should be used with caution.
+> Build various structures, railways, redstone circuits, and more. Let large language models expand your thinking, accelerate creativity, and enhance your gaming experience.
 
-- **File System Operations**: Reading, writing, merging, statistics, and aggregation
-- **Command-line Terminal**: Execute system commands directly
-- **Browser Control**: Powered by `github.com/chromedp/chromedp`
-    - Chrome browser is required.
-    - In Windows, the full path to Chrome needs to be configured in the system environment variables.
-- **Future Plans**:
-    - Personal PC data organization
-    - Document writing assistance
-    - Schedule planning
-    - Life assistant features
-
-> [!WARNING]
-> Currently, MoLing has only been tested on macOS, and other operating systems may have issues.
+![](./images/moling_minecraft.png)
 
 ### Supported MCP Clients
 
 - [Claude](https://claude.ai/)
 - [Cline](https://cline.bot/)
 - [Cherry Studio](https://cherry-ai.com/)
-- etc. (who support MCP protocol)
+- Others (clients supporting the MCP protocol)
 
-#### Demos
+### Demo
 
-https://github.com/user-attachments/assets/229c4dd5-23b4-4b53-9e25-3eba8734b5b7
+@TODO
 
-MoLing in [Claude](https://claude.ai/)
-![](./images/screenshot_claude.png)
+### Usage Steps
+#### Download Minecraft Java Server
+Download the latest Java server from the [Minecraft official website](https://www.minecraft.net/en-us/download/server) and save it locally.
 
-#### Configuration Format
+#### Installation
+1. Download the package from the [releases page](https://github.com/gojue/moling-minecraft/releases)
+2. Extract the package
 
-##### MCP Server (MoLing) configuration
+#### Initialization
+Run in command line:
+```sh
+./moling_mc config --init
+```
 
-The configuration file will be generated at `/Users/username/.moling/config/config.json`, and you can modify its
-contents as needed.
-
-If the file does not exist, you can create it using `moling config --init`.
-
-##### MCP Client configuration
-For example, to configure the Claude client, add the following configuration:
-
-> [!TIP]
-> 
-> Only 3-6 lines of configuration are needed.
-> 
-> Claude config path: `~/Library/Application\ Support/Claude/claude_desktop_config`
-
+#### Configure MoLing MineCraft
+Modify the configuration in `~/.moling_mc/config/config.json`
+For example:
 ```json
 {
-  "mcpServers": {
-    "MoLing MineCraft": {
-      "command": "/usr/local/bin/moling_mc",
-      "args": []
-    }
+ "Minecraft": {
+    "command_timeout": 3,
+    "game_version": "1.20.2",
+    "javaPath": "java",
+    "jvmMemoryArgs": "-Xms1024M -Xmx1024M",
+    "password": "",
+    "port": 25565,
+    "serverJarFile": "minecraft_server.1.20.2.jar",
+    "serverLogFile": "minecraft.log",
+    "serverRootPath": "/Users/cfc4n/Downloads/minecraft/minecraft_server/",
+    "server_address": "localhost",
+    "shutdownCommand": "stop",
+    "startupTimeout": 5,
+    "username": "MoLingMC"
+  },
+  "MoLingConfig": {
+    "Args": "",
+    "BaseUrl": "",
+    "Command": "",
+    "Description": "",
+    "HomeDir": "",
+    "ServerName": "",
+    "SystemInfo": "",
+    "Username": "",
+    "base_path": "/Users/cfc4n/.moling_mc",
+    "config_file": "config/config.json",
+    "debug": false,
+    "listen_addr": "",
+    "module": "all",
+    "version": "darwin_arm64_956e4d4_2025-04-20 21:52:18"
   }
 }
 ```
+You only need to modify `serverRootPath` and `serverJarFile`, other configurations can remain default.
 
-and, `/usr/local/bin/moling` is the path to the MoLing server binary you downloaded.
+#### Configure Minecraft Client
+Using [⛏ Hello Minecraft! Launcher](https://github.com/HMCL-dev/HMCL/releases) as an example, download it, start it first to load the relevant resources, and keep it ready.
 
-**Automatic Configuration**
+#### Configure LLM Client (MCP Client)
+Download the corresponding version from [Cherry Studio](https://github.com/CherryHQ/cherry-studio/releases), open it, and click the settings button in the lower left corner to enter the settings interface.
 
-run `moling client --install` to automatically install the configuration for the MCP client.
+##### Configure MCP Server
+Find the `MCP Server` option, click the `+` button to add a new MCP Server configuration.
+- Name: MoLing MineCraft
+- Description: MoLing MineCraft AI assistant, natural language interaction, better manage Minecraft server
+- Type: Standard Input/Output (Stdio)
+- Command: Path to the downloaded `moling_mc`, e.g., `/User/username/Downloads/moling_mc`
+- Parameters: _empty_
+- Environment Variables: _leave blank_
 
-MoLing will automatically detect the MCP client and install the configuration for you. including: Cline, Claude, Roo
-Code, etc.
+Save. You should see the available tools list in the `Tools` and `Resources` section, which means it's successful.
+![](./images/cherry_studio_mcp_server.png)
 
-### Operation Modes
+##### Configure Model Service
+In the configuration page, at the top of the `Model Service`, select the target model and configure it yourself. `Claude Sonnet 3.7` is recommended, followed by [DeepSeek](https://platform.deepseek.com/api_keys)'s `DeepSeek V3`, which requires applying for an API Key.
+![](./images/cherry_studio_llm_api.png)
 
-- **Stdio Mode**: CLI-based interactive mode for user-friendly experience
-- **SSE Mode**: Server-Side Rendering mode optimized for headless/automated environments
+##### Configure Prompts
+**Configure Agent**
+1. Open the `four-pointed star` agent button on the left, click `Create Agent`, name it `MoLing Minecraft Agent`, describe it as `MoLing Minecraft Assistant`, use the content from [prompts/minecraft.md](./prompts/minecraft.md) as the prompt, select either the `English` or `汉字` section, paste it, and click `Save`.
+2. On the left side of the `MCP Server`, find the `MoLing MineCraft` server added in the previous step, click the button to enable it.
+3. Close
 
-### Installation
+**Configure Assistant**
+1. Click the dialog box button above the `four-pointed star` to enter the assistant list
+2. Click `Add Assistant`, find the agent `MoLing Minecraft Agent` that was just added
+3. Select the current assistant to enter the conversation page.
 
-#### Option 1: Install via Script
-##### Linux/MacOS
-```shell
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/gojue/moling-minecraft/HEAD/install/install.sh)"
-```
-##### Windows
+#### Assign Tasks
 
-> [!WARNING]
-> Not tested, unsure if it works.
+Make sure the `MCP Server` icon is lit up and ensure that the `model` selected above is correct. Assign tasks in the chat window on the right.
+![](./images/cherry_studio_chat.png)
 
-```powershell
-powershell -ExecutionPolicy ByPass -c "irm https://raw.githubusercontent.com/gojue/moling-minecraft/HEAD/install/install.ps1 | iex"
-```
+> Build a railway near 3, 80, 19 leading to -240, 80, -40, with redstone circuits on top.
 
-#### Option 2: Direct Download
-1. Download the installation package from [releases page](https://github.com/gojue/moling-minecraft/releases)
-2. Extract the package
-3. Run the server:
-   ```sh
-   ./moling_mc
-   ```
+#### Witness the Magic
+Enter the game and enjoy.
 
-#### Option 3: Build from Source
-1. Clone the repository:
-```sh
-git clone https://github.com/gojue/moling-minecraft.git
-cd moling_minecraft
-```
-2. Build the project (requires Golang toolchain):
-```sh
-make build
-```
-3. Run the compiled binary:
-```sh
-./bin/moling_mc
-```
-
-### Usage
-After starting the server, connect using any supported MCP client by configuring it to point to your MoLing server address.
+### Instructions
+After starting the server, use any supported MCP client to configure and connect to your MoLing server address.
 
 ### License
-Apache License 2.0. See [LICENSE](LICENSE) for details.
+Apache License 2.0. See the [LICENSE](LICENSE) file for details.
