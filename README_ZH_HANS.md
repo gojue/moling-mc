@@ -65,8 +65,23 @@ MoLing MineCraft 是一个适用于《我的世界》游戏的 AI 智能体 MCP 
     "shutdownCommand": "stop",
     "startupTimeout": 5,
     "username": "MoLingMC"
+  },
+  "MoLingConfig": {
+    "Args": "",
+    "BaseUrl": "",
+    "Command": "",
+    "Description": "",
+    "HomeDir": "",
+    "ServerName": "",
+    "SystemInfo": "",
+    "Username": "",
+    "base_path": "/Users/cfc4n/.moling_mc",
+    "config_file": "config/config.json",
+    "debug": false,
+    "listen_addr": "",
+    "module": "all",
+    "version": "darwin_arm64_956e4d4_2025-04-20 21:52:18"
   }
-  // 
 }
 ```
 只需要修改`serverRootPath`和`serverJarFile`，其他配置可以保持默认。
