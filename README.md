@@ -9,7 +9,7 @@ English | [汉字](./README_ZH_HANS.md)
 
 ---
 
-![](./images/logo.svg)
+![](./images/moling_minecraft.png)
 
 ### Introduction
 MoLing MineCraft is an AI agent MCP server for the Minecraft game, featuring intelligent building, architecture, and game control capabilities. Through natural language interaction, it helps players realize complex constructions, redstone circuit designs, and other creative ideas, enhancing the gaming experience.
@@ -19,7 +19,6 @@ MoLing MineCraft is an AI agent MCP server for the Minecraft game, featuring int
 > [!CAUTION]
 > Build various structures, railways, redstone circuits, and more. Let large language models expand your thinking, accelerate creativity, and enhance your gaming experience.
 
-![](./images/moling_minecraft.png)
 
 ### Supported MCP Clients
 

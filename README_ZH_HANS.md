@@ -9,7 +9,7 @@
 
 ---
 
-![](./images/logo.svg)
+![](./images/moling_minecraft.png)
 
 ### 简介
 MoLing MineCraft 是一个适用于《我的世界》游戏的 AI 智能体 MCP 服务器，具有智能构建、建筑和游戏控制功能。通过自然语言交互，它可以帮助玩家实现复杂建筑、红石电路设计等创意，提升游戏体验。
@@ -19,7 +19,6 @@ MoLing MineCraft 是一个适用于《我的世界》游戏的 AI 智能体 MCP 
 > [!CAUTION]
 > 搭建各种建筑、铁路、红石电路等，让大模型帮你扩展思维，加速创造力，提升游戏体验。
 
-![](./images/moling_minecraft.png)
 
 ### 支持的MCP客户端
 
