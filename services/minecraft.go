@@ -37,7 +37,7 @@ import (
 )
 
 const (
-	MinecraftServerName = "MinecraftServer"
+	MinecraftServerName = "Minecraft"
 )
 
 // MinecraftServer represents the service for handling Minecraft commands.
