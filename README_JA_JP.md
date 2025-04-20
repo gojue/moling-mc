@@ -2,10 +2,10 @@
 
 [English](./README.md) | [中文](./README_ZH_HANS.md) | 日本語
 
-[![GitHub stars](https://img.shields.io/github/stars/gojue/moling.svg?label=Stars&logo=github)](https://github.com/gojue/moling/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/gojue/moling?label=Forks&logo=github)](https://github.com/gojue/moling/forks)
-[![CI](https://github.com/gojue/moling/actions/workflows/go-test.yml/badge.svg)](https://github.com/gojue/moling/actions/workflows/go-test.yml)
-[![Github Version](https://img.shields.io/github/v/release/gojue/moling?display_name=tag&include_prereleases&sort=semver)](https://github.com/gojue/moling/releases)
+[![GitHub stars](https://img.shields.io/github/stars/gojue/moling.svg?label=Stars&logo=github)](https://github.com/gojue/moling-minecraft/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/gojue/moling?label=Forks&logo=github)](https://github.com/gojue/moling-minecraft/forks)
+[![CI](https://github.com/gojue/moling-minecraft/actions/workflows/go-test.yml/badge.svg)](https://github.com/gojue/moling-minecraft/actions/workflows/go-test.yml)
+[![Github Version](https://img.shields.io/github/v/release/gojue/moling?display_name=tag&include_prereleases&sort=semver)](https://github.com/gojue/moling-minecraft/releases)
 
 ---
 
@@ -110,7 +110,7 @@ powershell -ExecutionPolicy ByPass -c "irm https://raw.githubusercontent.com/goj
 ```
 
 #### オプション2：直接ダウンロード
-1. [リリースページ](https://github.com/gojue/moling/releases)からインストールパッケージをダウンロード
+1. [リリースページ](https://github.com/gojue/moling-minecraft/releases)からインストールパッケージをダウンロード
 2. パッケージを解凍
 3. サーバーを実行：
    ```sh

@@ -4,7 +4,7 @@ Set-StrictMode -Version Latest
 
 Write-Output "Welcome to MoLing MCP Server initialization script."
 Write-Output "Home page: https://gojue.cc/moling"
-Write-Output "Github: https://github.com/gojue/moling"
+Write-Output "Github: https://github.com/gojue/moling-minecraft"
 
 # Determine the OS and architecture
 $OS = (Get-CimInstance Win32_OperatingSystem).Caption
@@ -21,7 +21,7 @@ switch ($ARCH) {
 
 # Determine the download URL
 $VERSION = "v0.0.1"
-$BASE_URL = "https://github.com/gojue/moling/releases/download/$VERSION"
+$BASE_URL = "https://github.com/gojue/moling-minecraft/releases/download/$VERSION"
 $FILE_NAME = "moling-$VERSION-windows-$ARCH.zip"
 $DOWNLOAD_URL = "$BASE_URL/$FILE_NAME"
 

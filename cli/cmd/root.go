@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// Repository: https://github.com/gojue/moling
+// Repository: https://github.com/gojue/moling-minecraft
 
 package cmd
 
@@ -20,9 +20,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/gojue/moling/cli/cobrautl"
-	"github.com/gojue/moling/services"
-	"github.com/gojue/moling/utils"
+	"github.com/gojue/moling-minecraft/cli/cobrautl"
+	"github.com/gojue/moling-minecraft/services"
+	"github.com/gojue/moling-minecraft/utils"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 	"os"

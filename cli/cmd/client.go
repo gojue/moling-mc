@@ -14,14 +14,14 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
- *  Repository: https://github.com/gojue/moling
+ *  Repository: https://github.com/gojue/moling-minecraft
  *
  */
 
 package cmd
 
 import (
-	"github.com/gojue/moling/client"
+	"github.com/gojue/moling-minecraft/client"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 	"os"

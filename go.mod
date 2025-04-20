@@ -1,4 +1,4 @@
-module github.com/gojue/moling
+module github.com/gojue/moling-minecraft
 
 go 1.24.1
 

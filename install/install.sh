@@ -4,7 +4,7 @@ set -e
 
 echo "Welcome to MoLing MCP Server initialization script."
 echo "Home page: https://gojue.cc/moling"
-echo "Github: https://github.com/gojue/moling"
+echo "Github: https://github.com/gojue/moling-minecraft"
 
 # Determine the OS and architecture
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
@@ -25,7 +25,7 @@ esac
 
 # Determine the download URL
 VERSION=$(curl -s https://api.github.com/repos/gojue/moling/releases/latest | grep 'tag_name' | cut -d\" -f4)
-BASE_URL="https://github.com/gojue/moling/releases/download/${VERSION}"
+BASE_URL="https://github.com/gojue/moling-minecraft/releases/download/${VERSION}"
 FILE_NAME="moling-${VERSION}-${OS}-${ARCH}.tar.gz"
 
 DOWNLOAD_URL="${BASE_URL}/${FILE_NAME}"
