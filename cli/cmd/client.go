@@ -30,11 +30,11 @@ import (
 
 var clientCmd = &cobra.Command{
 	Use:   "client",
-	Short: "Provides automated access to MoLing MCP Server for local MCP clients, Cline, Roo Code, and Claude, etc.",
+	Short: "Provides automated access to MoLing MineCraft MCP Server for local MCP clients, Cline, Roo Code, and Claude, etc.",
 	Long: `Automatically checks the MCP clients installed on the current computer, displays them, and automatically adds the MoLing MCP Server configuration to enable one-click activation, reducing the hassle of manual configuration.
 Currently supports the following clients: Cline, Roo Code, Claude
-    moling client -l --list   List the current installed MCP clients
-    moling client -i --install Add MoLing MCP Server configuration to the currently installed MCP clients on this computer
+    moling_mc client -l --list   List the current installed MCP clients
+    moling_mc client -i --install Add MoLing MCP Server configuration to the currently installed MCP clients on this computer
 `,
 	RunE: ClientCommandFunc,
 }

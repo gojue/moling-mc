@@ -73,8 +73,8 @@ For example, to configure the Claude client, add the following configuration:
 ```json
 {
   "mcpServers": {
-    "MoLing": {
-      "command": "/usr/local/bin/moling",
+    "MoLing MineCraft": {
+      "command": "/usr/local/bin/moling_mc",
       "args": []
     }
   }
@@ -100,7 +100,7 @@ Code, etc.
 #### Option 1: Install via Script
 ##### Linux/MacOS
 ```shell
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/gojue/moling/HEAD/install/install.sh)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/gojue/moling-minecraft/HEAD/install/install.sh)"
 ```
 ##### Windows
 
@@ -108,7 +108,7 @@ Code, etc.
 > Not tested, unsure if it works.
 
 ```powershell
-powershell -ExecutionPolicy ByPass -c "irm https://raw.githubusercontent.com/gojue/moling/HEAD/install/install.ps1 | iex"
+powershell -ExecutionPolicy ByPass -c "irm https://raw.githubusercontent.com/gojue/moling-minecraft/HEAD/install/install.ps1 | iex"
 ```
 
 #### Option 2: Direct Download
@@ -116,14 +116,14 @@ powershell -ExecutionPolicy ByPass -c "irm https://raw.githubusercontent.com/goj
 2. Extract the package
 3. Run the server:
    ```sh
-   ./moling
+   ./moling_mc
    ```
 
 #### Option 3: Build from Source
 1. Clone the repository:
 ```sh
-git clone https://github.com/gojue/moling.git
-cd moling
+git clone https://github.com/gojue/moling-minecraft.git
+cd moling_minecraft
 ```
 2. Build the project (requires Golang toolchain):
 ```sh
@@ -131,7 +131,7 @@ make build
 ```
 3. Run the compiled binary:
 ```sh
-./bin/moling
+./bin/moling_mc
 ```
 
 ### Usage

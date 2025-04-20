@@ -29,6 +29,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -53,6 +54,11 @@ type MinecraftServer struct {
 	serverWg     sync.WaitGroup     // WaitGroup for server goroutines
 	isRunning    bool               // Flag indicating if the server process is running
 	mu           sync.Mutex         // Mutex to protect access to shared resources (cmd, pipes, isRunning)
+
+	responseChans  map[string]chan string // 命令ID到响应通道的映射
+	responseMu     sync.Mutex             // 保护responseChans的互斥锁
+	pipesClosedMu  sync.Mutex
+	pipesClosedMap map[string]bool // 记录每个管道是否已关闭
 }
 
 // NewMinecraftServer creates a new MinecraftServer instance with the given context and configuration.
@@ -76,11 +82,13 @@ func NewMinecraftServer(ctx context.Context) (Service, error) {
 	serverCtx, serverCancel := context.WithCancel(context.Background()) // Use Background, manage lifecycle internally
 
 	ms := &MinecraftServer{
-		MLService:    NewMLService(ctx, logger.Hook(loggerNameHook), globalConf),
-		config:       mc,
-		serverCtx:    serverCtx,
-		serverCancel: serverCancel,
-		isRunning:    false,
+		MLService:      NewMLService(ctx, logger.Hook(loggerNameHook), globalConf),
+		config:         mc,
+		serverCtx:      serverCtx,
+		serverCancel:   serverCancel,
+		isRunning:      false,
+		responseChans:  make(map[string]chan string),
+		pipesClosedMap: make(map[string]bool),
 	}
 
 	//Init loads config and sets up tools/prompts
@@ -321,6 +329,12 @@ func (ms *MinecraftServer) Close() error {
 		_ = ms.cmd.Process.Release()
 	}
 
+	ms.pipesClosedMu.Lock()
+	// 标记管道为已关闭，实际关闭操作让logPipe函数处理
+	ms.pipesClosedMap["stdout"] = true
+	ms.pipesClosedMap["stderr"] = true
+	ms.pipesClosedMu.Unlock()
+
 	ms.isRunning = false
 	ms.cmd = nil
 	ms.logger.Info().Msg("Minecraft server service closed.")
@@ -397,6 +411,7 @@ func (ms *MinecraftServer) startMinecraftServerProcess() error {
 	}
 
 	ms.logger.Info().Str("java", ms.config.JavaPath).Strs("args", args).Msg("Preparing server command")
+	ms.logger.Info().Str("logfile", ms.config.ServerLogFile).Msg("Starting Minecraft server...")
 	cmd := exec.CommandContext(ms.serverCtx, ms.config.JavaPath, args...)
 	cmd.Dir = ms.config.ServerRootPath // Ensure command runs in the correct directory
 
@@ -454,14 +469,6 @@ func (ms *MinecraftServer) startMinecraftServerProcess() error {
 	ms.serverWg.Add(1)
 	go ms.logPipe("stderr", ms.stderrPipe)
 
-	// REMOVED: Goroutine forwarding os.Stdin - Interaction is now via WriteCommand only
-	// go func() {
-	// 	_, err := io.Copy(stdinPipe, os.Stdin) // DO NOT DO THIS
-	// 	if err != nil {
-	// 		ms.logger.Error().Err(err).Msg("Error forwarding input")
-	// 	}
-	// }()
-
 	// Wait for the process to exit in this goroutine
 	err = cmd.Wait()
 
@@ -490,7 +497,14 @@ func (ms *MinecraftServer) startMinecraftServerProcess() error {
 // Runs in its own goroutine managed by serverWg.
 func (ms *MinecraftServer) logPipe(pipeName string, pipe io.ReadCloser) {
 	defer ms.serverWg.Done()
-	defer pipe.Close() // Ensure the pipe is closed when done
+	defer func() {
+		ms.pipesClosedMu.Lock()
+		if !ms.pipesClosedMap[pipeName] {
+			pipe.Close()
+			ms.pipesClosedMap[pipeName] = true
+		}
+		ms.pipesClosedMu.Unlock()
+	}()
 
 	scanner := bufio.NewScanner(pipe)
 	logger := ms.logger.With().Str("pipe", pipeName).Logger()
@@ -501,8 +515,20 @@ func (ms *MinecraftServer) logPipe(pipeName string, pipe io.ReadCloser) {
 		// Log server output - adjust level as needed (e.g., Info or Debug)
 		logger.Info().Msg(line) // Using Info to make server logs visible by default
 
-		// TODO: Add basic log parsing here if needed for specific events (e.g., "Done loading" or errors)
-		// if strings.Contains(line, "[Server thread/INFO]: Done") { ... }
+		// 仅处理stdout管道的输出
+		if pipeName == "stdout" {
+			// 将输出发送给所有等待响应的通道
+			ms.responseMu.Lock()
+			for _, ch := range ms.responseChans {
+				select {
+				case ch <- line:
+					// 发送成功
+				default:
+					// 通道已满或已关闭，跳过
+				}
+			}
+			ms.responseMu.Unlock()
+		}
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -519,25 +545,43 @@ func (ms *MinecraftServer) logPipe(pipeName string, pipe io.ReadCloser) {
 
 // WriteCommand writes a command to the Minecraft server's standard input.
 func (ms *MinecraftServer) WriteCommand(command string) (*mcp.CallToolResult, error) {
-	ms.mu.Lock() // Lock to ensure exclusive access to stdinPipe and isRunning flag
-	defer ms.mu.Unlock()
-
-	ms.logger.Debug().Str("command", command).Msg("Attempting to write command to Minecraft server")
-
+	ms.mu.Lock()
 	if !ms.isRunning || ms.stdinPipe == nil {
+		ms.mu.Unlock()
 		ms.logger.Error().Msg("Cannot write command: Minecraft server is not running or stdin pipe is nil")
 		return mcp.NewToolResultError("Minecraft server is not running"), nil
 	}
 
-	// Add newline character required by Minecraft console
-	commandWithNewline := command + "\n"
+	// 创建一个唯一的命令ID
+	cmdID := fmt.Sprintf("cmd-%d", time.Now().UnixNano())
 
+	// 创建用于接收响应的通道
+	respChan := make(chan string, 10) // 缓冲大小可调整
+
+	// 注册响应通道
+	ms.responseMu.Lock()
+	ms.responseChans[cmdID] = respChan
+	ms.responseMu.Unlock()
+
+	// 确保在函数结束时清理资源
+	defer func() {
+		ms.responseMu.Lock()
+		delete(ms.responseChans, cmdID)
+		close(respChan)
+		ms.responseMu.Unlock()
+	}()
+
+	// 发送命令
+	commandWithNewline := command + "\n"
 	_, err := ms.stdinPipe.Write([]byte(commandWithNewline))
+	ms.mu.Unlock() // 发送后立即解锁，避免阻塞其他操作
+
 	if err != nil {
 		ms.logger.Error().Err(err).Str("command", command).Msg("Failed to write command to server stdin")
-		// Check if the error is because the pipe is closed (server might have crashed)
 		if errors.Is(err, os.ErrClosed) || strings.Contains(err.Error(), "pipe is closed") {
-			ms.isRunning = false // Mark as not running if pipe is closed
+			ms.mu.Lock()
+			ms.isRunning = false
+			ms.mu.Unlock()
 			return mcp.NewToolResultError("Failed to write command: Server connection lost (pipe closed)"), nil
 		}
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to write command: %v", err)), nil
@@ -545,18 +589,118 @@ func (ms *MinecraftServer) WriteCommand(command string) (*mcp.CallToolResult, er
 
 	ms.logger.Info().Str("command", command).Msg("Command sent successfully to Minecraft server")
 
-	// IMPORTANT: Lack of Feedback
-	// This function currently returns success immediately after writing.
-	// It does NOT wait for or parse the server's response from stdout/stderr.
-	// A more robust implementation would:
-	// 1. Read stdout/stderr after sending the command.
-	// 2. Parse the output for success messages (e.g., "Filled ... blocks") or error messages.
-	// 3. Return success/failure based on the parsed output.
-	// This requires knowledge of Minecraft's specific log formats and is more complex.
-	// For now, we assume success if the write operation doesn't fail. Check server logs for actual results.
-	return mcp.NewToolResultText(fmt.Sprintf("Command '%s' sent to server. Check server logs for results.", command)), nil
+	// 等待响应，有超时机制
+	var responseLines []string
+	responseTimeout := time.After(time.Duration(ms.config.CommandTimeout) * time.Second)
+	collectingTimeout := time.After(500 * time.Millisecond) // 收集响应的短暂窗口
+	collecting := true
+
+	for collecting {
+		select {
+		case line, ok := <-respChan:
+			if !ok {
+				collecting = false
+				break
+			}
+			// 可以在这里添加逻辑来过滤或分析输出行
+			responseLines = append(responseLines, line)
+
+			// 使用isMcSuccessLog函数检查命令是否执行成功或失败
+			if strings.Contains(line, "[Server thread/INFO]") &&
+				(isMcSuccessLog(line) || strings.Contains(line, "Error:") ||
+					strings.Contains(line, "failed")) {
+				collecting = false
+			}
+
+		case <-collectingTimeout:
+			// 短暂收集窗口结束
+			collecting = false
+
+		case <-responseTimeout:
+			// 超时
+			ms.logger.Warn().Str("command", command).Msg("Timeout waiting for command response")
+			return mcp.NewToolResultText(fmt.Sprintf("Command '%s' sent, but response timed out after %d seconds",
+				command, ms.config.CommandTimeout)), nil
+		}
+	}
+
+	// 处理收集到的响应
+	if len(responseLines) == 0 {
+		return mcp.NewToolResultText(fmt.Sprintf("Command '%s' sent, no specific response detected", command)), nil
+	}
+
+	// 分析响应，检测成功或错误
+	fullResponse := strings.Join(responseLines, "\n")
+
+	if !isMcSuccessLog(fullResponse) {
+		return mcp.NewToolResultError(fmt.Sprintf("Command '%s' failed: %s", command, getMcMessage(fullResponse))), nil
+	}
+
+	return mcp.NewToolResultText(fmt.Sprintf("Command '%s' executed: %s", command, getMcMessage(fullResponse))), nil
 }
 
 func init() {
 	RegisterServ(MinecraftServerName, NewMinecraftServer)
+}
+
+// isMcSuccessLog checks if a log line indicates a successful command execution in Minecraft.
+func isMcSuccessLog(line string) bool {
+	// 命令执行成功的典型模式
+	successPatterns := []string{
+		"Successfully",     // 通用成功消息
+		"blocks filled",    // fill命令成功
+		"blocks changed",   // setblock命令成功
+		"blocks copied",    // clone命令成功
+		"summoned",         // summon命令成功
+		"Given ",           // give命令成功
+		"Teleported ",      // teleport命令成功
+		"players match",    // 选择器匹配成功
+		"entity was found", // 实体查找成功
+		"Setting ",         // 设置游戏规则等成功
+	}
+
+	// 命令执行失败的典型模式
+	failurePatterns := []string{
+		"Error:",                 // 通用错误消息
+		"failed",                 // 通用失败消息
+		"Could not ",             // 常见错误前缀
+		"Unknown command",        // 未知命令
+		"Usage:",                 // 命令用法错误
+		"position is not loaded", // 位置未加载
+		"Expected ",              // 命令参数期望错误
+		"Not a valid ",           // 无效参数
+		"No entity was found",    // 未找到实体
+		"no elements",            // 没有元素
+		"No game rule",           // 游戏规则不存在
+		"is not valid",           // 通用无效消息
+	}
+
+	// 首先检查是否包含失败模式，因为失败优先级更高
+	for _, pattern := range failurePatterns {
+		if strings.Contains(line, pattern) {
+			return false
+		}
+	}
+
+	// 然后检查是否包含成功模式
+	for _, pattern := range successPatterns {
+		if strings.Contains(line, pattern) {
+			return true
+		}
+	}
+
+	// 如果没有明确的成功或失败标志，默认不确定
+	// 在不确定的情况下返回false，要求更明确的成功信号
+	return false
+}
+
+// getMcMessage extracts the message from the Minecraft server response.
+func getMcMessage(resp string) string {
+	messageRegex := regexp.MustCompile(`\[(\d{2}:\d{2}:\d{2})\]\s+\[Server thread/(INFO|WARN|ERROR)\]:\s*(.*)\s*`)
+	// 根据响应内容判断成功或失败
+	matches := messageRegex.FindStringSubmatch(resp)
+	if len(matches) > 0 {
+		return matches[3]
+	}
+	return ""
 }

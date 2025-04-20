@@ -31,7 +31,7 @@ func TestConfigLoad(t *testing.T) {
 	configFile := "config_test.json"
 	cfg := &MoLingConfig{}
 	cfg.ConfigFile = "config.json"
-	cfg.BasePath = "/tmp/moling"
+	cfg.BasePath = "/tmp/moling_mc"
 	cfg.Version = "1.0.0"
 	cfg.ListenAddr = ":8080"
 	cfg.Debug = true
@@ -55,7 +55,7 @@ func TestConfigLoad(t *testing.T) {
 		t.Fatalf("failed to merge JSON to struct: %v", err)
 	}
 	t.Logf("Config loaded, MoLing Config.BasePath: %s", cfg.BasePath)
-	if cfg.BasePath != "/newpath/.moling" {
-		t.Fatalf("expected BasePath to be '/newpath/.moling', got '%s'", cfg.BasePath)
+	if cfg.BasePath != "/newpath/.moling_mc" {
+		t.Fatalf("expected BasePath to be '/newpath/.moling_mc', got '%s'", cfg.BasePath)
 	}
 }

@@ -72,8 +72,8 @@ https://github.com/user-attachments/assets/229c4dd5-23b4-4b53-9e25-3eba8734b5b7
 ```json
 {
   "mcpServers": {
-    "MoLing": {
-      "command": "/usr/local/bin/moling",
+    "MoLing MineCraft": {
+      "command": "/usr/local/bin/moling_mc",
       "args": []
     }
   }
@@ -98,7 +98,7 @@ MoLingはMCPクライアントを自動的に検出し、設定をインスト�
 #### オプション1：スクリプトを使用してインストール
 ##### Linux/MacOS
 ```shell
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/gojue/moling/HEAD/install/install.sh)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/gojue/moling-minecraft/HEAD/install/install.sh)"
 ```
 ##### Windows
 
@@ -106,7 +106,7 @@ MoLingはMCPクライアントを自動的に検出し、設定をインスト�
 > テストされていないため、動作するかどうかは不明です。
 
 ```powershell
-powershell -ExecutionPolicy ByPass -c "irm https://raw.githubusercontent.com/gojue/moling/HEAD/install/install.ps1 | iex"
+powershell -ExecutionPolicy ByPass -c "irm https://raw.githubusercontent.com/gojue/moling-minecraft/HEAD/install/install.ps1 | iex"
 ```
 
 #### オプション2：直接ダウンロード
@@ -114,14 +114,14 @@ powershell -ExecutionPolicy ByPass -c "irm https://raw.githubusercontent.com/goj
 2. パッケージを解凍
 3. サーバーを実行：
    ```sh
-   ./moling
+   ./moling_mc
    ```
 
 #### オプション3：ソースからビルド
 1. リポジトリをクローン：
 ```sh
-git clone https://github.com/gojue/moling.git
-cd moling
+git clone https://github.com/gojue/moling-minecraft.git
+cd moling_minecraft
 ```
 2. プロジェクトをビルド（Golangツールチェーンが必要）：
 ```sh
@@ -129,7 +129,7 @@ make build
 ```
 3. コンパイルされたバイナリを実行：
 ```sh
-./bin/moling
+./bin/moling_mc
 ```
 
 ### 使用方法

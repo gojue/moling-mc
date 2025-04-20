@@ -11,7 +11,7 @@ SHELL = /bin/bash
 .PHONY: env
 env:
 	@echo ---------------------------------------
-	@echo "MoLing Makefile Environment:"
+	@echo "MoLing MineCraft Makefile Environment:"
 	@echo ---------------------------------------
 	@echo "SNAPSHOT_VERSION         $(SNAPSHOT_VERSION)"
 	@echo ---------------------------------------
