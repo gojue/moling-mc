@@ -1,42 +1,25 @@
 ## MoLing MCP 服务器
 
-[English](./README.md) | 中文 | [日本語](./README_JA_JP.md)
+[English](./README.md) | 汉字 
 
-[![GitHub stars](https://img.shields.io/github/stars/gojue/moling.svg?label=Stars&logo=github)](https://github.com/gojue/moling-minecraft/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/gojue/moling?label=Forks&logo=github)](https://github.com/gojue/moling-minecraft/forks)
+[![GitHub stars](https://img.shields.io/github/stars/gojue/moling-minecraft.svg?label=Stars&logo=github)](https://github.com/gojue/moling-minecraft/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/gojue/moling-minecraft?label=Forks&logo=github)](https://github.com/gojue/moling-minecraft/forks)
 [![CI](https://github.com/gojue/moling-minecraft/actions/workflows/go-test.yml/badge.svg)](https://github.com/gojue/moling-minecraft/actions/workflows/go-test.yml)
-[![Github Version](https://img.shields.io/github/v/release/gojue/moling?display_name=tag&include_prereleases&sort=semver)](https://github.com/gojue/moling-minecraft/releases)
+[![Github Version](https://img.shields.io/github/v/release/gojue/moling-minecraft?display_name=tag&include_prereleases&sort=semver)](https://github.com/gojue/moling-minecraft/releases)
 
 ---
 
 ![](./images/logo.svg)
 
 ### 简介
-MoLing是一个computer-use和browser-use的MCP Server，基于操作系统API实现了系统交互，浏览器模拟控制，可以实现文件系统的读写、合并、统计、聚合等操作，也可以执行系统命令操作。是一个无需任何依赖的本地办公自动化助手。
-
-### 优势
-> [!IMPORTANT]
-> 没有任何安装依赖，直接运行，兼容Windows、Linux、macOS等操作系统。
-> 再也不用苦恼NodeJS、Python、Docker等环境冲突等问题。
+MoLing MineCraft 是一个适用于《我的世界》游戏的 AI 智能体 MCP 服务器，具有智能构建、建筑和游戏控制功能。通过自然语言交互，它可以帮助玩家实现复杂建筑、红石电路设计等创意，提升游戏体验。
 
 ### 功能特性
 
 > [!CAUTION]
-> 命令行操作具备一定风险性，且不可回滚，使用需谨慎，默认配置为只读的命令列表。
+> 搭建各种建筑、铁路、红石电路等，让大模型帮你扩展思维，加速创造力，提升游戏体验。
 
-- **文件系统操作**：读取、写入、合并、统计和聚合
-- **命令行终端**：直接执行系统命令
-- **浏览器控制**：基于 `github.com/chromedp/chromedp`
-  - 需要安装Chrome浏览器
-  - Windows系统中，需要在环境变量中配置Chrome的完整路径
-- **未来计划**：
-    - 个人电脑资料整理
-    - 文档编写辅助
-    - 行程规划
-    - 生活助手功能
-
-> [!WARNING]
-> 当前, MoLing仅在macOS测试通过，Linux和Windows未经验证。
+![](./images/moling_minecraft.png)
 
 ### 支持的MCP客户端
 
@@ -45,91 +28,89 @@ MoLing是一个computer-use和browser-use的MCP Server，基于操作系统API�
 - [Cherry Studio](https://cherry-ai.com/)
 - 其他（支持MCP协议的客户端）
 
-#### 演示
+### 演示
 
-https://github.com/user-attachments/assets/229c4dd5-23b4-4b53-9e25-3eba8734b5b7
+@TODO
 
-集成在[Claude](https://claude.ai/)中的MoLing
-![](./images/screenshot_claude.png)
+### 使用步骤
+#### 下载《我的世界》 Java版服务端
+从[《我的世界》官网](https://www.minecraft.net/zh-hans/download/server)下载最新的Java版服务端，保存到本地。
 
-#### 配置格式
-
-##### MCP Server（MoLing）配置
-
-配置文件会生成在`/Users/username/.moling/config/config.json`下，你可以自行修改内容。若文件不存在，你可以通过
-`moling config --init`创建它。
-
-##### MCP Client配置
-以Claude客户端为例，在配置文件中添加如下配置：
-
-> [!TIP]
-> 
-> 仅需添加3-6行的配置。
-> Claude配置文件路径：`~/Library/Application\ Support/Claude/claude_desktop_config`
-
-```json
-{
-  "mcpServers": {
-    "MoLing MineCraft": {
-      "command": "/usr/local/bin/moling_mc",
-      "args": []
-    }
-  }
-}
-```
-
-另外， `/usr/local/bin/moling` 是你存放`MoLing` Server可执行文件的路径，可以自己指定。
-
-**自动配置**
-
-运行 `moling client --install` 命令将会自动为本机的所有MCP客户端安装MoLing。包括Cline、 Claude、 Roo Code等等。
-
-### 运行模式
-
-- **Stdio模式**：本地命令行交互模式，依赖于终端输入输出，适合人机交互
-- **SSE模式**：远程通讯模式，适合远程部署，远程调用
-
-### 安装指南
-
-
-#### 方法一： 脚本安装
-#### Linux/MacOS
-```shell
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/gojue/moling-minecraft/HEAD/install/install.sh)"
-```
-
-##### Windows
-
-> [!WARNING]
-> 未测试，不确定是否正常。
-
-```powershell
-powershell -ExecutionPolicy ByPass -c "irm https://raw.githubusercontent.com/gojue/moling-minecraft/HEAD/install/install.ps1 | iex"
-```
-
-
-#### 方法二：直接下载
+#### 安装
 1. 从[发布页面](https://github.com/gojue/moling-minecraft/releases)下载安装包
 2. 解压安装包
-3. 运行服务器：
+
+#### 初始化
+在命令行中运行：
 ```sh
-./moling_mc
+./moling_mc config --init
 ```
 
-#### 方法三：从源码编译
-1. 克隆代码库：
-```sh
-git clone https://github.com/gojue/moling-minecraft.git
-cd moling_minecraft
+#### 配置 MoLing MineCraft 
+修改`~/.moling_mc/config/config.json`中的配置
+例如：
+```json
+{
+ "Minecraft": {
+    "command_timeout": 3,
+    "game_version": "1.20.2",
+    "javaPath": "java",
+    "jvmMemoryArgs": "-Xms1024M -Xmx1024M",
+    "password": "",
+    "port": 25565,
+    "serverJarFile": "minecraft_server.1.20.2.jar",
+    "serverLogFile": "minecraft.log",
+    "serverRootPath": "/Users/cfc4n/Downloads/minecraft/minecraft_server/",
+    "server_address": "localhost",
+    "shutdownCommand": "stop",
+    "startupTimeout": 5,
+    "username": "MoLingMC"
+  }
+  // 
+}
 ```
-2. 编译项目（需要Golang工具链）：
-```sh
-make build
-```
-3. 运行编译后的程序：
-```sh
-./bin/moling_mc
-```
+只需要修改`serverRootPath`和`serverJarFile`，其他配置可以保持默认。
+#### 配置《我的世界》客户端
+以[⛏ Hello Minecraft! Launcher](https://github.com/HMCL-dev/HMCL/releases)为例，下载后，先启动，加载相关资源，备用。
+
+#### 配置大模型客户端（MCP Client)
+从[Cherry Studio](https://github.com/CherryHQ/cherry-studio/releases)  下载对应版本，打开后，点击左下角的设置按钮，进入设置界面。
+##### 配置MCP Server
+找到`MCP 服务器`选项，点击的`+`号，添加新的MCP Server配置。
+- 名称：MoLing MineCraft
+- 描述：MoLing MineCraft AI助手，自然语言交互，更好地管理《我的世界》服务器
+- 类型：标准输入/输出（Stdio）
+- 命令：前面下载`moling_mc`的路径，比如 `/User/username/Downloads/moling_mc`
+- 参数：_为空_
+- 环境变量：_留空_
+
+保存。在页面的`工具`、`资源`中能看到可用工具列表，即为成功。
+![](./images/cherry_studio_mcp_server.png)
+
+##### 配置模型服务
+在配置页面，最上面的`模型服务`中，选择目标模型，自行配置好，推荐`Claude sonnet 3.7`，其次是[深度求索](https://platform.deepseek.com/api_keys)的`DeepSeek V3`，需要申请API Key。
+![](./images/cherry_studio_llm_api.png)
+
+##### 配置提示词
+**配置智能体** 
+1. 打开左侧的`四角星`智能体按钮，点击`创建智能体`，名称为`MoLing我的世界智能体`，描述为`MoLing我的世界助手`，提示词为[prompts/minecraft.md](./prompts/minecraft.md)中的内容，选择`English`或`汉字`部分的内容即可，粘贴后点击`保存`。
+2. 在左侧的`MCP 服务器`内，找到上一步添加的`MoLing MineCraft`服务器，点击按钮，启用。
+3. 关闭
+
+**配置助手**
+1. 点击`四角星`上面的对话框按钮，进入助手列表
+2. 点击`添加助手`，找到刚才添加的智能体`MoLing我的世界智能体`，
+2. 选中当前助手，进入对话页面。
+
+#### 安排任务
+
+确保`MCP服务器`图标已点亮，且确保上面的`模型`选择正确。 在右侧的聊天窗口内，安排任务即可。
+![](./images/cherry_studio_chat.png)
+
+> 在3，80，19附近建造一条铁轨，通向 -240，80，-40，上面配有红石电路。
+
+#### 见证奇迹
+进入游戏，享受吧。
 
 ### 使用说明
 启动服务器后，使用任何支持的MCP客户端配置连接到您的MoLing服务器地址即可。
