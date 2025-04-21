@@ -24,8 +24,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/rs/zerolog"
 	"io"
 	"os"
 	"os/exec"
@@ -34,6 +32,9 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/mark3labs/mcp-go/mcp"
+	"github.com/rs/zerolog"
 )
 
 const (
@@ -220,6 +221,56 @@ func (ms *MinecraftServer) registerTools() {
 		mcp.WithString("destination", mcp.Description("Destination coordinates (x y z) or entity selector"), mcp.Required()),
 		mcp.WithString("rotation", mcp.Description("Rotation (yaw pitch) (optional)")),
 	), ms.handleTeleport)
+
+	// 添加新的命令工具注册
+
+	ms.AddTool(mcp.NewTool(
+		"minecraft_gamerule",
+		mcp.WithDescription("Get or set a game rule value"),
+		mcp.WithString("rule", mcp.Description("The name of the game rule to query or change"), mcp.Required()),
+		mcp.WithString("value", mcp.Description("The new value for the game rule (omit to query the current value)")),
+	), ms.handleGameRule)
+
+	ms.AddTool(mcp.NewTool(
+		"minecraft_time",
+		mcp.WithDescription("Change or query the world's game time"),
+		mcp.WithString("subcommand", mcp.Description("The time subcommand: set, add, or query"), mcp.Required()),
+		mcp.WithString("value", mcp.Description("Time value (for set/add) or time specification (for query)")),
+		mcp.WithString("timeSpec", mcp.Description("Time specification for query: day, daytime, or gametime")),
+	), ms.handleTime)
+
+	ms.AddTool(mcp.NewTool(
+		"minecraft_weather",
+		mcp.WithDescription("Set the weather state"),
+		mcp.WithString("type", mcp.Description("Weather type (clear, rain, or thunder)"), mcp.Required()),
+		mcp.WithNumber("duration", mcp.Description("Duration in seconds (optional)")),
+	), ms.handleWeather)
+
+	ms.AddTool(mcp.NewTool(
+		"minecraft_effect",
+		mcp.WithDescription("Add or remove status effects from entities"),
+		mcp.WithString("subcommand", mcp.Description("The effect subcommand: give or clear"), mcp.Required()),
+		mcp.WithString("target", mcp.Description("Target entity selector (e.g., @p, PlayerName)"), mcp.Required()),
+		mcp.WithString("effect", mcp.Description("The effect to add or remove (e.g., minecraft:speed, required for 'give', optional for 'clear')")),
+		mcp.WithNumber("seconds", mcp.Description("Duration in seconds (optional for 'give')")),
+		mcp.WithNumber("amplifier", mcp.Description("Effect amplifier level (0-255, optional, requires seconds)")),
+		mcp.WithString("hideParticles", mcp.Description("Whether to hide particles (optional, requires seconds and amplifier)")),
+	), ms.handleEffect)
+
+	ms.AddTool(mcp.NewTool(
+		"minecraft_difficulty",
+		mcp.WithDescription("Set the game difficulty"),
+		mcp.WithString("difficulty", mcp.Description("Difficulty level (peaceful, easy, normal, hard, or 0-3)"), mcp.Required()),
+	), ms.handleDifficulty)
+
+	ms.AddTool(mcp.NewTool(
+		"minecraft_spawnpoint",
+		mcp.WithDescription("Set the spawn point for a player"),
+		mcp.WithString("target", mcp.Description("Target player (optional, defaults to command executor)")),
+		mcp.WithString("x", mcp.Description("X coordinate (optional)")),
+		mcp.WithString("y", mcp.Description("Y coordinate (optional)")),
+		mcp.WithString("z", mcp.Description("Z coordinate (optional)")),
+	), ms.handleSpawnpoint)
 }
 
 // Helper function for extracting and validating string parameters
