@@ -9,7 +9,7 @@ English | [汉字](./README_ZH_HANS.md)
 
 ---
 
-![](./images/moling_minecraft.png)
+https://github.com/user-attachments/assets/1b64d9e5-2cc1-4d9e-8175-9aef425781c8
 
 ### Introduction
 MoLing-MineCraft is an AI agent MCP server for the Minecraft game, featuring intelligent building, architecture, and game control capabilities. Through natural language interaction, it helps players realize complex constructions, redstone circuit designs, and other creative ideas, enhancing the gaming experience.
@@ -26,10 +26,6 @@ MoLing-MineCraft is an AI agent MCP server for the Minecraft game, featuring int
 - [Cline](https://cline.bot/)
 - [Cherry Studio](https://cherry-ai.com/)
 - Others (clients supporting the MCP protocol)
-
-### Demo
-
-https://github.com/user-attachments/assets/1b64d9e5-2cc1-4d9e-8175-9aef425781c8
 
 ### Usage Steps
 #### Download Minecraft Java Server
