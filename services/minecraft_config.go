@@ -25,23 +25,23 @@ import (
 
 // MinecraftConfig represents the configuration for the Minecraft service.
 type MinecraftConfig struct {
-	// --- Fields for connecting to an EXISTING server (e.g., via RCON - currently NOT used by StartMinecraftServer) ---
-	ServerAddress string `json:"server_address"` // Address of the Minecraft server (if connecting, not starting)
-	Port          int    `json:"port"`           // Port of the Minecraft server (e.g., RCON port)
-	Username      string `json:"username"`       // Username for authentication (if needed)
-	Password      string `json:"password"`       // Password for authentication (if needed)
+	PromptPath    string `json:"prompt_path,omitempty"`
+	ServerAddress string `json:"server_address" json:"server_address,omitempty"` // Address of the Minecraft server (if connecting, not starting)
+	Port          int    `json:"port" json:"port,omitempty"`                     // Port of the Minecraft server (e.g., RCON port)
+	Username      string `json:"username" json:"username,omitempty"`             // Username for authentication (if needed)
+	Password      string `json:"password" json:"password,omitempty"`             // Password for authentication (if needed)
 
 	// --- Fields for STARTING a NEW local server ---
-	ServerRootPath  string `json:"serverRootPath"`  // Path to the Minecraft server root directory
-	ServerJarFile   string `json:"serverJarFile"`   // Name of the server JAR file (e.g., "minecraft_server.1.20.2.jar")
-	JavaPath        string `json:"javaPath"`        // Path to the java executable (default: "java")
-	JvmMemoryArgs   string `json:"jvmMemoryArgs"`   // JVM memory arguments (e.g., "-Xms1024M -Xmx2048M")
-	ServerLogFile   string `json:"serverLogFile"`   // Path to the server log file (relative to ServerRootPath or absolute)
-	StartupTimeout  int    `json:"startupTimeout"`  // Seconds to wait for server startup (approximate)
-	ShutdownCommand string `json:"shutdownCommand"` // Command to gracefully stop the server (e.g., "stop")
+	ServerRootPath  string `json:"serverRootPath" json:"server_root_path,omitempty"`  // Path to the Minecraft server root directory
+	ServerJarFile   string `json:"serverJarFile" json:"server_jar_file,omitempty"`    // Name of the server JAR file (e.g., "minecraft_server.1.20.2.jar")
+	JavaPath        string `json:"javaPath" json:"java_path,omitempty"`               // Path to the java executable (default: "java")
+	JvmMemoryArgs   string `json:"jvmMemoryArgs" json:"jvm_memory_args,omitempty"`    // JVM memory arguments (e.g., "-Xms1024M -Xmx2048M")
+	ServerLogFile   string `json:"serverLogFile" json:"server_log_file,omitempty"`    // Path to the server log file (relative to ServerRootPath or absolute)
+	StartupTimeout  int    `json:"startupTimeout" json:"startup_timeout,omitempty"`   // Seconds to wait for server startup (approximate)
+	ShutdownCommand string `json:"shutdownCommand" json:"shutdown_command,omitempty"` // Command to gracefully stop the server (e.g., "stop")
 
-	GameVersion    string `json:"game_version"`    // Informational, used in prompts
-	CommandTimeout int    `json:"command_timeout"` // Timeout for individual command execution (if applicable in future connection methods)
+	GameVersion    string `json:"game_version" json:"game_version,omitempty"`       // Informational, used in prompts
+	CommandTimeout int    `json:"command_timeout" json:"command_timeout,omitempty"` // Timeout for individual command execution (if applicable in future connection methods)
 }
 
 // NewMinecraftConfig creates a new MinecraftConfig with default values.
