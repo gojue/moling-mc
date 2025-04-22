@@ -1,3 +1,14 @@
+# v0.2.1 (2025-04-22)
+
+## What's Changed
+### English
+* fix: After Claude Desktop is closed, the moling MCP server cannot exit normally
+
+### 汉字
+* 修复: 在Claude Desktop关闭后，MoLing MCP Server不能正常退出
+
+<hr>
+
 # v0.2.0 (2025-04-21)
 
 ## What's Changed
